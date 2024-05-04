@@ -7,7 +7,7 @@ const Navbar = () => {
   return (
     <nav className="p-3 flex justify-between items-center">
       <Link href="https://warpcast.com/~/channel/tiser" target="blank">
-        <Image src="/logo.png" alt="Tiser Logo" width={45} height={45} />
+        <Image src="/logo.png" alt="Tiser Logo" width={45} height={45} className="rounded-full"/>
       </Link>
       <div className="flex gap-5 items-center">
         <Link href="/">Leaderboard</Link>
