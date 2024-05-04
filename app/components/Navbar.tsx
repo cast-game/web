@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   return (
-    <nav className="p-3 flex justify-between items-center">
+    <nav className="p-3 flex justify-between items-center absolute top-0 w-full">
       <Link href="https://warpcast.com/~/channel/tiser" target="blank">
         <Image src="/logo.png" alt="Tiser Logo" width={45} height={45} className="rounded-full"/>
       </Link>

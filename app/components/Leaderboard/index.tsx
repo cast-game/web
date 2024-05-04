@@ -6,7 +6,7 @@ const Leaderboard = () => {
   const [sortBy, setSortBy] = useState("likes");
 
   return (
-    <div className="flex flex-col justify-center px-20 w-100 h-100 pt-10">
+    <div className="flex flex-col justify-center px-20 w-full max-w-5xl h-full mt-5">
       <OverviewCard />
       <div className="mt-12">
         <div className="flex items-center gap-5 text-slate-300">
