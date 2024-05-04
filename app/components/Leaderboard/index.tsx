@@ -1,59 +1,32 @@
 "use client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { formatTimeRemaining } from "@/lib/helpers";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import OverviewCard from "./OverviewCard";
 
 const Leaderboard = () => {
-  const prizePoolBalance = 250871;
-  const tradeCount = 1239;
-  const deadline = 1714944818;
-
-  const [timeRemaining, setTimeRemaining] = useState(
-    formatTimeRemaining(deadline)
-  );
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeRemaining(formatTimeRemaining(deadline));
-    }, 1000);
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(interval);
-  }, [deadline]);
+  const [sortBy, setSortBy] = useState("likes");
 
   return (
     <div className="flex flex-col justify-center px-20 w-100 h-100 pt-10">
-      <Card>
-        <CardHeader>
-          <CardDescription>Current winner prize pool:</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-between items-center">
-            <span className="text-5xl font-bold text-indigo-300">
-              {prizePoolBalance} $DEGEN
+      <OverviewCard />
+      <div className="mt-12">
+        <div className="flex items-center gap-5 text-slate-300">
+          <span className="text-2xl font-medium">Top Casts</span>
+          <div className="flex cursor-pointer gap-3">
+            <span
+              onClick={() => setSortBy("likes")}
+              className={`${sortBy === "price" ? "opacity-65" : ""} hover:text-white`}
+            >
+              by likes
             </span>
-            <div className="flex flex-col items-end text-lg">
-              <span className="text-slate-400">
-                Tickets traded:{" "}
-                <span className="text-white font-semibold">{tradeCount}</span>
-              </span>
-              <span className="text-slate-400">
-                Round ends in{" "}
-                <span className="text-white font-semibold">
-                  {formatTimeRemaining(deadline)}
-                </span>
-              </span>
-            </div>
+            <span
+              onClick={() => setSortBy("price")}
+              className={`${sortBy === "likes" ? "opacity-65" : ""} hover:text-white`}
+            >
+              by price
+            </span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
