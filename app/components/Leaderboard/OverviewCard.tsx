@@ -40,7 +40,7 @@ const OverviewCard = () => {
           </span>
           <div className="flex flex-col items-end text-lg">
             <span className="text-slate-400">
-              Tickets traded:{" "}
+              Tickets bought:{" "}
               <span className="text-white font-semibold">{tradeCount}</span>
             </span>
             <span className="text-slate-400">

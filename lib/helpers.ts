@@ -3,7 +3,7 @@ export function formatTimeRemaining(unixTimestamp: number): string {
   const difference = unixTimestamp - now;
 
   if (difference <= 0) {
-    return "Timestamp has already passed";
+    return "-";
   }
 
   const hours = Math.floor(difference / 3600);
