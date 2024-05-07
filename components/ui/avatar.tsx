@@ -20,6 +20,21 @@ const Avatar = React.forwardRef<
 ))
 Avatar.displayName = AvatarPrimitive.Root.displayName
 
+const SmallAvatar = React.forwardRef<
+  React.ElementRef<typeof AvatarPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <AvatarPrimitive.Root
+    ref={ref}
+    className={cn(
+      "relative flex h-7 w-7 shrink-0 overflow-hidden rounded-full",
+      className
+    )}
+    {...props}
+  />
+))
+SmallAvatar.displayName = AvatarPrimitive.Root.displayName
+
 const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
@@ -47,4 +62,4 @@ const AvatarFallback = React.forwardRef<
 ))
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
-export { Avatar, AvatarImage, AvatarFallback }
+export { Avatar, SmallAvatar, AvatarImage, AvatarFallback }
