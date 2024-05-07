@@ -10,7 +10,10 @@ const Leaderboard = () => {
   const [casts, setCasts] = useState<Cast[]>([]);
 
   const fetchCasts = async () => {
-    const response = await getCasts(["0x02d3f308a0f56aa39766d9f66d5c40c9aefb47f9"]);
+    const response = await getCasts([
+      "0x02d3f308a0f56aa39766d9f66d5c40c9aefb47f9",
+      "0x5d4ef473e8826c5a13c4218a537953bd25ae5c9c",
+    ]);
     setCasts(response);
   };
 
@@ -43,9 +46,13 @@ const Leaderboard = () => {
             </span>
           </div>
         </div>
-        <div className="flex-col">{casts.map((cast: Cast) => (
-          <CastPreview key={cast.hash} cast={cast} />
-        ))}</div>
+        <div className="flex-col pt-6 space-y-3">
+          {casts.map((cast: Cast, i: number) => (
+            <div className={`p-3 border-2 rounded-lg ${i === 0 ? "border-green-600" : "border-slate-900"}`}>
+              <CastPreview key={cast.hash} cast={cast} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
