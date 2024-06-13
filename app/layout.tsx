@@ -9,9 +9,9 @@ const fontSans = FontSans({
 })
 
 export const metadata: Metadata = {
-	title: "Cast Game",
+	title: "cast.game",
 	description:
-		"A prediction game to win $ by betting on casts in a Farcaster channel!",
+		"A prediction game to win $ by betting on casts in a Farcaster channel",
 };
 
 export default function RootLayout({
