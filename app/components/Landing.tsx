@@ -12,7 +12,7 @@ const Landing = () => {
 					<span className="max-w-sm">
 						Join{" "}
 						<Link
-							href={"https://warpcast.com/~/channel/castgame"}
+							href={"https://cast.game/channel"}
 							target="_blank"
 						>
 							<span className="font-bold hover:opacity-70 transition ease-in-out duration-200">/castgame</span>
@@ -21,7 +21,7 @@ const Landing = () => {
 					</span>
 				</div>
 				<div className="flex gap-5">
-					<Link href="https://warpcast.com/~/channel/castgame" target="_blank">
+					<Link href="https://cast.game/channel" target="_blank">
 						<Image
 							src="/warpcast-logo.png"
 							alt="Join our channel on Farcaster"
@@ -31,7 +31,7 @@ const Landing = () => {
 						/>
 					</Link>
 					<Link
-						href="https://castgame.notion.site/cast-game-spec-6ee80b83da2f4f78b46acf1a68001adf"
+						href="https:cast.game/about"
 						target="_blank"
 					>
 						<Image
