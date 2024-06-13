@@ -31,7 +31,7 @@ const Landing = () => {
 						/>
 					</Link>
 					<Link
-						href="https:cast.game/about"
+						href="https://cast.game/about"
 						target="_blank"
 					>
 						<Image
