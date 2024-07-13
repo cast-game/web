@@ -16,7 +16,7 @@ const Navbar = async () => {
         <Avatar className="h-5 w-5">
           <AvatarImage src={channel.image_url} />
         </Avatar>
-        <span className="text-lg font-bold">{channelId}</span>
+        <span className="text-lg font-bold">/{channelId}</span>
       </div>
       <div className="flex gap-5 items-center">
         <Link href="/">Game</Link>

@@ -6,7 +6,7 @@ import CastPreview from "../CastPreview";
 import { getCasts } from "@/lib/api";
 
 const Leaderboard = () => {
-  const [sortBy, setSortBy] = useState("likes");
+  const [sortBy, setSortBy] = useState("rank");
   const [casts, setCasts] = useState<Cast[]>([]);
 
   const fetchCasts = async () => {
@@ -29,17 +29,17 @@ const Leaderboard = () => {
           <span className="text-2xl font-medium">Top Casts</span>
           <div className="flex cursor-pointer gap-3">
             <span
-              onClick={() => setSortBy("likes")}
+              onClick={() => setSortBy("rank")}
               className={`${
                 sortBy === "price" ? "opacity-65" : ""
               } hover:text-white`}
             >
-              by likes
+              by rank
             </span>
             <span
               onClick={() => setSortBy("price")}
               className={`${
-                sortBy === "likes" ? "opacity-65" : ""
+                sortBy === "rank" ? "opacity-65" : ""
               } hover:text-white`}
             >
               by price
@@ -48,8 +48,13 @@ const Leaderboard = () => {
         </div>
         <div className="flex-col pt-6 space-y-3">
           {casts.map((cast: Cast, i: number) => (
-            <div className={`p-3 border-2 rounded-lg ${i === 0 ? "border-green-600" : "border-slate-900"}`}>
-              <CastPreview key={cast.hash} cast={cast} />
+            <div
+              className={`p-5 border-4 rounded bg-black/30 ${
+                i === 0 ? "border-amber-400" : i === 1 ? "border-slate-400" : i === 2 ? "border-yellow-700" : "border-slate-900"
+              }`}
+              key={cast.hash}
+            >
+              <CastPreview cast={cast} />
             </div>
           ))}
         </div>
