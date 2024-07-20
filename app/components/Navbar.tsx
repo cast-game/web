@@ -5,9 +5,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getChannel } from "@/lib/api";
 
 
-const Navbar = async () => {
+const Navbar = async ({ selection }: { selection: string }) => {
   const channelId = "memes";
   const channel = await getChannel(channelId);
+
+  const getLinkClass = (linkText: string) =>
+    selection === linkText
+      ? "opacity-100"
+      : "opacity-70 hover:opacity-100 focus:opacity-100";
 
   return (
     <nav className="p-3 flex justify-between items-center absolute top-0 w-full">
@@ -19,9 +24,15 @@ const Navbar = async () => {
         <span className="text-lg font-bold">/{channelId}</span>
       </div>
       <div className="flex gap-5 items-center">
-        <Link href="/">Game</Link>
-        <Link href="/activity">Activity</Link>
-        <Link href="/tickets">My Tickets</Link>
+        <Link href="/" className={getLinkClass("Overview")}>
+          Overview
+        </Link>
+        <Link href="/activity" className={getLinkClass("Activity")}>
+          Activity
+        </Link>
+        <Link href="/tickets" className={getLinkClass("My Tickets")}>
+          My Tickets
+        </Link>
         <Button>Sign In With Warpcast</Button>
       </div>
     </nav>
