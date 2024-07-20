@@ -8,7 +8,7 @@ import {
 import { Embed } from "./Embed";
 import type { Cast, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { getTimeSince } from "@/lib/helpers";
-import { Heart, Ticket } from "lucide-react";
+import { BadgeInfo } from "lucide-react";
 import { getTicketInfo } from "@/lib/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -66,28 +66,36 @@ const CastPreview = ({ cast }: Props) => {
           <Embed _embedObject={cast.embeds[0]} />
         ) : null} */}
           </div>
-          <div className="flex gap-6">
-            <div className="flex items-center text-sm gap-2 text-slate-400 font-semibold">
-              <Heart size={20} color="#c93131" fill={"#c93131"} />
-              {/* <span>{cast.}</span> */}
-            </div>
-            <div className="flex items-center text-sm gap-2 text-slate-400 font-semibold">
-              <Ticket size={20} color="#e3e3e3" fill={"#707070"} />
-              <span>-</span>
-            </div>
-          </div>
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-2 opacity-85 hover:opacity-100">
+                  <BadgeInfo size={22}/>
+                  <span className="flex gap-6">SCV: 235.21</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Social Capital Value represents Lorem Ipsum.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <div className="flex flex-col items-end gap-2 text-sm text-slate-400">
-          <span>Popular holders:</span>
+          <span>Holders (32):</span>
           <div className="flex gap-1">
             {ticketInfo?.topHolders.map((user: User) => (
-              <TooltipProvider>
+              <TooltipProvider key={user.username} delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <SmallAvatar>
-                      <AvatarImage src={user.pfp_url} />
-                      <AvatarFallback>FC</AvatarFallback>
-                    </SmallAvatar>
+                    <Link
+                      href={`https://warpcast.com/${user.username}`}
+                      target="_blank"
+                    >
+                      <SmallAvatar>
+                        <AvatarImage src={user.pfp_url} />
+                        <AvatarFallback>FC</AvatarFallback>
+                      </SmallAvatar>
+                    </Link>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>@{user.username}</p>
