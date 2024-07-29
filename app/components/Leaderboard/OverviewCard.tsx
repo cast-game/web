@@ -1,59 +1,86 @@
-"use client";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { formatTimeRemaining } from "@/lib/helpers";
-import { useEffect, useState } from "react";
-
 const OverviewCard = () => {
-	const prizePoolBalance = 250871;
-	const tradeCount = 1239;
-	const deadline = 1714944818;
+  // test data
+  const gameTitle = "Testnet Demo Competition";
+  const rewardPool = "1.21";
+  const txCount = 86;
+  const userCount = 35;
+  const endsIn = "15:43:28";
 
-	const [timeRemaining, setTimeRemaining] = useState(
-		formatTimeRemaining(deadline)
-	);
-
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setTimeRemaining(formatTimeRemaining(deadline));
-		}, 1000);
-
-		// Cleanup interval on component unmount
-		return () => clearInterval(interval);
-	}, [deadline]);
-
-	return (
-		<Card className="relative bg-black/50">
-			<CardHeader>
-				<CardTitle>Current Prize Pool:</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<span className="text-5xl font-bold">{prizePoolBalance} $DEGEN</span>
-				<div className="flex justify-between items-center">
-					<div className="flex flex-col items-end text-lg">
-						<div className="flex flex-col items-end text-slate-400 absolute top-5 right-7">
-							<span>
-								Round ends in{" "}
-								<span className="text-white font-semibold">
-									{formatTimeRemaining(deadline)}
-								</span>
-							</span>
-							<span className="text-slate-400">
-								Tickets bought:{" "}
-								<span className="text-white font-semibold">{tradeCount}</span>
-							</span>
-						</div>
-					</div>
-				</div>
-			</CardContent>
-		</Card>
-	);
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        backgroundColor: "white",
+        color: "black",
+        padding: "2rem",
+        flexDirection: "column",
+				borderRadius: "10px",
+      }}
+    >
+      <span style={{ fontSize: "2rem", fontWeight: 700 }}>{gameTitle}</span>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "1rem",
+          padding: "2rem 0",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            padding: ".8rem 2rem",
+            backgroundColor: "#E2E2E2",
+            borderRadius: "10px",
+            flexDirection: "column",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: ".5rem" }}>
+            <img
+              src="https://seeklogo.com/images/E/ethereum-logo-EC6CDBA45B-seeklogo.com.png"
+              style={{ height: "30px" }}
+            />
+            <span style={{ fontSize: "2rem", fontWeight: 700 }}>
+              {rewardPool}
+            </span>
+          </div>
+          <span style={{ fontSize: "1.1rem" }}>reward pool</span>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            padding: ".8rem 2rem",
+            backgroundColor: "#E2E2E2",
+            borderRadius: "10px",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <span style={{ fontSize: "2rem", fontWeight: 700 }}>{txCount}</span>
+          <span style={{ fontSize: "1.1rem" }}>transactions</span>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            padding: ".8rem 2rem",
+            backgroundColor: "#E2E2E2",
+            borderRadius: "10px",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <span style={{ fontSize: "2rem", fontWeight: 700 }}>{userCount}</span>
+          <span style={{ fontSize: "1.1rem" }}>participants</span>
+        </div>
+      </div>
+      <span style={{ fontSize: "1.3rem" }}>
+        Ends in <span style={{ fontWeight: 700 }}>{endsIn}</span>
+      </span>
+    </div>
+  );
 };
 
 export default OverviewCard;
