@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getChannel } from "@/lib/api";
 
-
 const Navbar = async ({ selection }: { selection: string }) => {
-  const channelId = "memes";
+  const channelId = "castgame";
   const channel = await getChannel(channelId);
 
   const getLinkClass = (linkText: string) =>
@@ -33,7 +32,13 @@ const Navbar = async ({ selection }: { selection: string }) => {
         <Link href="/tickets" className={getLinkClass("My Tickets")}>
           My Tickets
         </Link>
-        <Button>Sign In With Warpcast</Button>
+        <a href="https://google.com">
+          <div className="flex bg-indigo-600 rounded-xl px-6 py-3 font-medium hover:bg-indigo-600/90">
+            Sign In With Warpcast
+          </div>
+        </a>
+
+        {/* <Button>Sign In With Warpcast</Button> */}
       </div>
     </nav>
   );
