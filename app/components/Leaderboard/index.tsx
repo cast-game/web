@@ -2,11 +2,12 @@
 import { useEffect, useState } from "react";
 import OverviewCard from "./OverviewCard";
 import type { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import CastPreview from "../CastPreview";
 import { getCasts } from "@/lib/api";
+import CastPreview from "../CastPreview";
+// import { getCasts } from "@/lib/api";
 
 const Leaderboard = () => {
-  const [sortBy, setSortBy] = useState("rank");
+  const [sortBy, setSortBy] = useState("score");
   const [casts, setCasts] = useState<Cast[]>([]);
 
   const fetchCasts = async () => {
@@ -29,17 +30,17 @@ const Leaderboard = () => {
           <span className="text-2xl font-medium">Top Casts</span>
           <div className="flex cursor-pointer gap-3">
             <span
-              onClick={() => setSortBy("rank")}
+              onClick={() => setSortBy("score")}
               className={`${
                 sortBy === "price" ? "opacity-65" : ""
               } hover:text-white`}
             >
-              by rank
+              by score
             </span>
             <span
               onClick={() => setSortBy("price")}
               className={`${
-                sortBy === "rank" ? "opacity-65" : ""
+                sortBy === "score" ? "opacity-65" : ""
               } hover:text-white`}
             >
               by price
@@ -49,7 +50,7 @@ const Leaderboard = () => {
         <div className="flex-col pt-6 space-y-3">
           {casts.map((cast: Cast, i: number) => (
             <div
-              className={`p-5 border-4 rounded bg-black/30 ${
+              className={`p-4 rounded bg-slate-200 ${
                 i === 0 ? "border-amber-400" : i === 1 ? "border-slate-400" : i === 2 ? "border-yellow-700" : "border-slate-900"
               }`}
               key={cast.hash}
