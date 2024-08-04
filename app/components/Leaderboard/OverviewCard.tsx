@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const OverviewCard = () => {
   // test data
   const gameTitle = "Testnet Demo Competition";
@@ -7,78 +9,37 @@ const OverviewCard = () => {
   const endsIn = "15:43:28";
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "100%",
-        backgroundColor: "white",
-        color: "black",
-        padding: "2rem",
-        flexDirection: "column",
-				borderRadius: "10px",
-      }}
-    >
-      <span style={{ fontSize: "2rem", fontWeight: 700 }}>{gameTitle}</span>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "1rem",
-          padding: "2rem 0",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            padding: ".8rem 2rem",
-            backgroundColor: "#E2E2E2",
-            borderRadius: "10px",
-            flexDirection: "column",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: ".5rem" }}>
-            <img
-              src="https://seeklogo.com/images/E/ethereum-logo-EC6CDBA45B-seeklogo.com.png"
-              style={{ height: "30px" }}
+    <div className="flex rounded items-center justify-center w-full flex-col p-8 bg-slate-200 rounded">
+      <h1 className="text-3xl font-bold">{gameTitle}</h1>
+
+      <div className="flex items-center gap-4 my-7">
+        <div className="flex flex-col items-center rounded px-6 py-3 bg-slate-300 rounded">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/eth-logo.png"
+              width={27}
+              height={27}
+              alt="Ethereum logo"
             />
-            <span style={{ fontSize: "2rem", fontWeight: 700 }}>
-              {rewardPool}
-            </span>
+            <span className="text-3xl font-bold">{rewardPool}</span>
           </div>
-          <span style={{ fontSize: "1.1rem" }}>reward pool</span>
+          <span className="text-lg">reward pool</span>
         </div>
-        <div
-          style={{
-            display: "flex",
-            padding: ".8rem 2rem",
-            backgroundColor: "#E2E2E2",
-            borderRadius: "10px",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <span style={{ fontSize: "2rem", fontWeight: 700 }}>{txCount}</span>
-          <span style={{ fontSize: "1.1rem" }}>transactions</span>
+
+        <div className="flex flex-col items-center px-6 py-3 bg-slate-300 rounded">
+          <span className="text-3xl font-bold">{txCount}</span>
+          <span className="text-lg">transactions</span>
         </div>
-        <div
-          style={{
-            display: "flex",
-            padding: ".8rem 2rem",
-            backgroundColor: "#E2E2E2",
-            borderRadius: "10px",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <span style={{ fontSize: "2rem", fontWeight: 700 }}>{userCount}</span>
-          <span style={{ fontSize: "1.1rem" }}>participants</span>
+
+        <div className="flex flex-col items-center px-6 py-3 bg-slate-300 rounded">
+          <span className="text-3xl font-bold">{userCount}</span>
+          <span className="text-lg">participants</span>
         </div>
       </div>
-      <span style={{ fontSize: "1.3rem" }}>
-        Ends in <span style={{ fontWeight: 700 }}>{endsIn}</span>
-      </span>
+
+      <p className="text-xl font-medium">
+        Ends in <span className="font-bold">{endsIn}</span>
+      </p>
     </div>
   );
 };
