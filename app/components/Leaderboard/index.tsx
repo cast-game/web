@@ -23,7 +23,7 @@ const Leaderboard = () => {
   }, []);
 
   return (
-    <div className="flex flex-col justify-center px-20 w-full max-w-5xl h-full mt-5">
+    <div className="flex flex-col justify-center px-20 w-full max-w-5xl h-full mt-5 text-black">
       <OverviewCard />
       <div className="mt-12 gap-4">
         <div className="flex items-center gap-5 text-slate-300">
@@ -51,7 +51,13 @@ const Leaderboard = () => {
           {casts.map((cast: Cast, i: number) => (
             <div
               className={`p-4 rounded bg-slate-200 ${
-                i === 0 ? "border-amber-400" : i === 1 ? "border-slate-400" : i === 2 ? "border-yellow-700" : "border-slate-900"
+                i === 0
+                  ? "border-amber-400"
+                  : i === 1
+                  ? "border-slate-400"
+                  : i === 2
+                  ? "border-yellow-700"
+                  : "border-slate-900"
               }`}
               key={cast.hash}
             >

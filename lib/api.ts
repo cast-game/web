@@ -1,3 +1,4 @@
+import { BulkCastsSortType } from "@neynar/nodejs-sdk/build/neynar-api/common/constants";
 import { NeynarV2APIClient } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { config } from "dotenv";
 config();
@@ -6,20 +7,10 @@ const neynar = new NeynarV2APIClient(process.env.NEXT_PUBLIC_NEYNAR_API_KEY!)
 const baseUrl = "https://api.neynar.com/v2/farcaster";
 
 export const getCasts = async (castsHashes: string[]) => {
-  console.log(castsHashes);
-  const endpoint = `${baseUrl}/casts?casts=${castsHashes.join(
-    "%2C"
-  )}&sort_type=likes`;
-
-  const res = await fetch(endpoint, {
-    headers: {
-      accept: "application/json",
-      api_key: process.env.NEXT_PUBLIC_NEYNAR_API_KEY!,
-    },
+  const res = await neynar.fetchBulkCasts(castsHashes, {
+    sortType: BulkCastsSortType.LIKES,
   });
-
-  const response = await res.json();
-  return response.result.casts;
+  return res.result.casts;
 };
 
 export const getChannel = async (channelId: string) => {
@@ -27,21 +18,28 @@ export const getChannel = async (channelId: string) => {
   return res.channels[0]
 }
 
-// export const getTicketInfo = async (cast: Cast) => {
-//   // TODO: Change later
-//   const holderFids = cast.reactions.likes.map((user: any) => user.fid);
-//   const endpoint = `${baseUrl}/user/bulk?fids=${holderFids.join("%2C")}`;
-//   const res = await fetch(endpoint, {
-//     headers: {
-//       accept: "application/json",
-//       api_key: process.env.NEXT_PUBLIC_NEYNAR_API_KEY!,
-//     },
-//   });
+export const getDetails = async () => {
+	const [rewardPool, txsRes, statsRes] = await Promise.all([
+		client.getBalance({
+			address: gameAddress,
+		}),
+		queryData(`{
+			transactions {
+				items {
+					id
+				}
+			}
+		}`),
+		queryData(`{
+			gameStats(id: "0") {
+				users
+			}
+		}`),
+	]);
 
-//   const response = await res.json();
-
-//   return {
-//     topHolders: response.users,
-//     price: 999,
-//   };
-// };
+	return {
+		rewardPool: Number(formatEther(rewardPool)).toFixed(3),
+		transactionCount: txsRes.transactions.items.length,
+		userCount: statsRes.gameStats.users.length,
+	};
+};

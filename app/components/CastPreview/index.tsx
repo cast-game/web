@@ -20,6 +20,12 @@ interface Props {
 
 const CastPreview = ({ cast }: Props) => {
   const timeSince = getTimeSince(cast.timestamp);
+
+  const embeds = cast.embeds.map((embed: any) => {
+    if (embed.metadata) return embed.metadata.content_type.split("/")[0];
+    return "quote";
+  });
+
   // const [ticketInfo, setTicketInfo] = useState<any>(null);
 
   // useEffect(() => {
@@ -52,13 +58,17 @@ const CastPreview = ({ cast }: Props) => {
                   @{cast.author.username} · {timeSince}
                 </p>
               </div>
-              <p className="font-normal pr-3 line-clamp-3 mb-2">
+              <p className="font-medium pr-3 line-clamp-3 mb-2">
                 {cast.text.replace(/https?:\/\/\S+/i, "")}
               </p>
               <div className="flex gap-2">
-                <div className="flex items-center font-medium rounded-full px-3 py-1 text-sm bg-black/20">
-                  + image
-                </div>
+                {embeds.map((embed: string) => {
+                  return (
+                    <div className="flex items-center font-medium rounded-full px-3 py-1 text-sm bg-black/20">
+                      + {embed}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -66,7 +76,7 @@ const CastPreview = ({ cast }: Props) => {
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="text-sm flex self-end items-center justify-center mb-2 px-3 py-1 bg-gradient-to-r from-[#45A3B8] to-[#23B68A] text-white font-semibold rounded">
+                  <div className="text-sm flex self-end items-center justify-center mb-2 px-3 py-1 bg-gradient-to-r from-[#45A3B8] to-[#23B68A] text-white font-semibold rounded-full">
                     21.35
                   </div>
                 </TooltipTrigger>
