@@ -1,7 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getChannel } from "@/lib/api";
 
 const Navbar = async ({ selection }: { selection: string }) => {
@@ -17,9 +15,13 @@ const Navbar = async ({ selection }: { selection: string }) => {
     <nav className="p-3 flex justify-between items-center absolute top-0 w-full">
       <div className="flex items-center ml-4 gap-2">
         <div className="rounded-full h-2 w-2 bg-green-500" />
-        <Avatar className="h-5 w-5">
-          <AvatarImage src={channel.image_url} />
-        </Avatar>
+        <Image
+          src={channel.image_url!}
+          alt={"/" + channel.id}
+          width={30}
+          height={30}
+          className="rounded-full"
+        />
         <span className="text-lg font-bold">/{channelId}</span>
       </div>
       <div className="flex gap-5 items-center">
@@ -33,7 +35,7 @@ const Navbar = async ({ selection }: { selection: string }) => {
           My Tickets
         </Link>
         <a href="https://google.com">
-          <div className="flex bg-indigo-600 rounded-xl px-6 py-3 font-medium hover:bg-indigo-600/90">
+          <div className="flex bg-indigo-600 rounded px-5 py-2 font-medium hover:bg-indigo-600/90">
             Sign In With Warpcast
           </div>
         </a>
