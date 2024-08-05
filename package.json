@@ -26,7 +26,8 @@
     "sharp": "^0.33.4",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "unfurl.js": "^6.4.0"
+    "unfurl.js": "^6.4.0",
+    "viem": "^2.18.8"
   },
   "devDependencies": {
     "@types/node": "^20",
