@@ -27,17 +27,19 @@ const Navbar = ({ selection }: { selection: string }) => {
 
   return (
     <nav className="p-3 flex justify-between items-center absolute top-0 w-full">
-      <div className="flex items-center ml-4 gap-2">
-        <div className="rounded-full h-2 w-2 bg-green-500" />
-        <Image
-          src={channel?.image_url!}
-          alt={"/" + channel?.id}
-          width={30}
-          height={30}
-          className="rounded-full"
-        />
-        <span className="text-lg font-bold">/{channelId}</span>
-      </div>
+      <a href={`https://warpcast.com/~/channel/${channel?.id}`} target="_black">
+        <div className="flex items-center ml-4 gap-2">
+          <div className="rounded-full h-2 w-2 bg-green-500" />
+          <Image
+            src={channel?.image_url!}
+            alt={"/" + channel?.id}
+            width={30}
+            height={30}
+            className="rounded-full"
+          />
+          <span className="text-lg font-bold">/{channelId}</span>
+        </div>
+      </a>
       <div className="flex gap-5 items-center">
         <Link href="/" className={getLinkClass("Overview")}>
           Overview
