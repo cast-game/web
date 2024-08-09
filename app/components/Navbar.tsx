@@ -1,10 +1,24 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { getChannel } from "@/lib/api";
+import { use, useEffect, useState } from "react";
+import { Channel } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 
-const Navbar = async ({ selection }: { selection: string }) => {
+const Navbar = ({ selection }: { selection: string }) => {
   const channelId = "castgame";
-  const channel = await getChannel(channelId);
+  // const channel = await getChannel(channelId);
+
+  const [channel, setChannel] = useState<Channel | null>(null);
+
+  const fetchChannel = async () => {
+    const response = await getChannel(channelId);
+    setChannel(response);
+  };
+
+  useEffect(() => {
+    fetchChannel();
+  }, []);
 
   const getLinkClass = (linkText: string) =>
     selection === linkText
@@ -16,8 +30,8 @@ const Navbar = async ({ selection }: { selection: string }) => {
       <div className="flex items-center ml-4 gap-2">
         <div className="rounded-full h-2 w-2 bg-green-500" />
         <Image
-          src={channel.image_url!}
-          alt={"/" + channel.id}
+          src={channel?.image_url!}
+          alt={"/" + channel?.id}
           width={30}
           height={30}
           className="rounded-full"
