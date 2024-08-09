@@ -16,9 +16,10 @@ import {
 
 interface Props {
   cast: Cast;
+  showPrice?: boolean;
 }
 
-const CastPreview = ({ cast }: Props) => {
+const CastPreview = ({ cast, showPrice = true }: Props) => {
   const timeSince = getTimeSince(cast.timestamp);
 
   const embeds = cast.embeds.map((embed: any) => {
@@ -46,8 +47,8 @@ const CastPreview = ({ cast }: Props) => {
         <div className="flex flex-row w-full justify-between" key={cast.hash}>
           <div className="flex">
             <Avatar className="mr-3">
-              <AvatarImage src={cast.author.pfp_url} height={20} width={20} />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage src={cast.author.pfp_url} />
+              <AvatarFallback>@{cast.author.username}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col text-black">
               <div className="flex">
@@ -62,13 +63,14 @@ const CastPreview = ({ cast }: Props) => {
                 {cast.text.replace(/https?:\/\/\S+/i, "")}
               </p>
               <div className="flex gap-2">
-                {embeds.map((embed: string) => {
-                  return (
-                    <div className="flex items-center font-medium rounded-full px-3 py-1 text-sm bg-black/20">
-                      + {embed}
-                    </div>
-                  );
-                })}
+                {embeds.map((embed: string) => (
+                  <div
+                    key={embed}
+                    className="flex items-center font-medium rounded-full px-3 py-1 text-sm bg-black/20"
+                  >
+                    + {embed}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -85,15 +87,17 @@ const CastPreview = ({ cast }: Props) => {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <div className="flex text-xl items-center gap-1 text-black font-bold py-1 px-3 bg-black/20 rounded justify-center">
-              <Image
-                src="/eth-logo.png"
-                width={20}
-                height={20}
-                alt="Ethereum logo"
-              />
-              <span>2.1</span>
-            </div>
+            {showPrice && (
+              <div className="flex text-xl items-center gap-1 text-black font-bold py-1 px-3 bg-black/20 rounded justify-center">
+                <Image
+                  src="/eth-logo.png"
+                  width={20}
+                  height={20}
+                  alt="Ethereum logo"
+                />
+                <span>2.1</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
