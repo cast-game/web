@@ -1,14 +1,73 @@
-import Navbar from "./components/Navbar";
-import Leaderboard from "./components/Leaderboard";
-import Landing from "./components/Landing";
 
-export default function Home() {
+"use client";
+import CastPreview from "./components/CastPreview";
+import { useEffect, useState } from "react";
+import OverviewCard from "./components/OverviewCard";
+import { getCasts } from "@/lib/api";
+import { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+
+const Home = () => {
+  const [sortBy, setSortBy] = useState("score");
+  const [casts, setCasts] = useState<Cast[]>([]);
+
+  const fetchCasts = async () => {
+    const response = await getCasts([
+      "0x02d3f308a0f56aa39766d9f66d5c40c9aefb47f9",
+      "0x5d4ef473e8826c5a13c4218a537953bd25ae5c9c",
+    ]);
+    setCasts(response);
+  };
+
+  useEffect(() => {
+    fetchCasts();
+  }, []);
+
   return (
-    <>
-      {/* <Landing /> */}
-      <div className="flex justify-center pt-20">
-        <Leaderboard />
+    <div className="flex flex-col justify-center text-black">
+      <OverviewCard />
+      <div className="mt-12 gap-4">
+        <div className="flex items-center gap-5 text-slate-300">
+          <span className="text-2xl font-medium">Top Casts</span>
+          <div className="flex cursor-pointer gap-3">
+            <span
+              onClick={() => setSortBy("score")}
+              className={`${
+                sortBy === "price" ? "opacity-65" : ""
+              } hover:text-white`}
+            >
+              by score
+            </span>
+            <span
+              onClick={() => setSortBy("price")}
+              className={`${
+                sortBy === "score" ? "opacity-65" : ""
+              } hover:text-white`}
+            >
+              by price
+            </span>
+          </div>
+        </div>
+        <div className="flex-col pt-6 space-y-3">
+          {casts.map((cast: Cast, i: number) => (
+            <div
+              className={`p-4 rounded bg-slate-200 ${
+                i === 0
+                  ? "border-amber-400"
+                  : i === 1
+                  ? "border-slate-400"
+                  : i === 2
+                  ? "border-yellow-700"
+                  : "border-slate-900"
+              }`}
+              key={cast.hash}
+            >
+              <CastPreview cast={cast} />
+            </div>
+          ))}
+        </div>
       </div>
-    </>
+    </div>
   );
 }
+
+export default Home;

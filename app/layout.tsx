@@ -26,7 +26,9 @@ export default function RootLayout({
         className={cn("min-h-screen font-sans antialiased", fontSans.variable)}
       >
         <Navbar />
-        <main className="pt-20">{children}</main>
+        <main className="flex pt-20 justify-center">
+          <div className="max-w-4xl p-5">{children}</div>
+        </main>
       </body>
     </html>
   );
