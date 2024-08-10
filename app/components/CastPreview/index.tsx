@@ -20,7 +20,9 @@ interface Props {
 }
 
 const CastPreview = ({ cast, showPrice = true }: Props) => {
-  const timeSince = getTimeSince(cast.timestamp);
+  const timeSince = getTimeSince(
+    Math.floor(new Date(cast.timestamp).getTime()).toString()
+  );
 
   const embeds = cast.embeds.map((embed: any) => {
     if (embed.metadata) return embed.metadata.content_type.split("/")[0];

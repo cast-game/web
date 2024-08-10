@@ -15,8 +15,8 @@ export function formatTimeRemaining(unixTimestamp: number): string {
   ).padStart(2, "0")}`;
 }
 
-export function getTimeSince(date: string) {
-  const _date = new Date(date);
+export function getTimeSince(unix: string) {
+  const _date = new Date(Number(unix));
   var seconds = Math.floor((Number(new Date()) - Number(_date)) / 1000);
   var interval = Math.floor(seconds / 31536000);
 
