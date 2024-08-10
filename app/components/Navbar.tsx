@@ -1,14 +1,21 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { getChannel } from "@/lib/api";
 import { use, useEffect, useState } from "react";
 import { Channel } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 
-const Navbar = ({ selection }: { selection: string }) => {
-  const channelId = "castgame";
-  // const channel = await getChannel(channelId);
+const links = [
+  { href: "/", label: "Overview" },
+  { href: "/activity", label: "Activity" },
+  { href: "/tickets", label: "My Tickets" },
+];
 
+const Navbar = () => {
+  // TODO: get from db
+  const pathname = usePathname();
+  const channelId = "castgame";
   const [channel, setChannel] = useState<Channel | null>(null);
 
   const fetchChannel = async () => {
@@ -19,12 +26,7 @@ const Navbar = ({ selection }: { selection: string }) => {
   useEffect(() => {
     fetchChannel();
   }, []);
-
-  const getLinkClass = (linkText: string) =>
-    selection === linkText
-      ? "opacity-100"
-      : "opacity-70 hover:opacity-100 focus:opacity-100";
-
+  
   return (
     <nav className="p-3 flex justify-between items-center absolute top-0 w-full">
       <a href={`https://warpcast.com/~/channel/${channel?.id}`} target="_black">
@@ -41,22 +43,24 @@ const Navbar = ({ selection }: { selection: string }) => {
         </div>
       </a>
       <div className="flex gap-5 items-center">
-        <Link href="/" className={getLinkClass("Overview")}>
-          Overview
-        </Link>
-        <Link href="/activity" className={getLinkClass("Activity")}>
-          Activity
-        </Link>
-        <Link href="/tickets" className={getLinkClass("My Tickets")}>
-          My Tickets
-        </Link>
+        {links.map(({ href, label }) => (
+          <Link
+            key={href}
+            href={href}
+            className={
+              pathname === href
+                ? "opacity-100"
+                : "opacity-75 hover:opacity-100 focus:opacity-100"
+            }
+          >
+            {label}
+          </Link>
+        ))}
         <a href="https://google.com">
           <div className="flex bg-indigo-600 rounded px-5 py-2 font-medium hover:bg-indigo-600/90">
             Sign In With Warpcast
           </div>
         </a>
-
-        {/* <Button>Sign In With Warpcast</Button> */}
       </div>
     </nav>
   );

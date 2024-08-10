@@ -6,7 +6,6 @@ export default function Home() {
   return (
     <>
       {/* <Landing /> */}
-      <Navbar selection="Overview" />
       <div className="flex justify-center pt-20">
         <Leaderboard />
       </div>
