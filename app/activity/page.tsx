@@ -1,15 +1,13 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
-import { Cast, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { getCasts, getUsers, queryData } from "@/lib/api";
 import CastPreview from "../components/CastPreview";
-import Casts from "@/lib/casts";
 import { formatEther } from "viem";
-import { formatTimeRemaining, getTimeSince } from "@/lib/helpers";
+import { getTimeSince } from "@/lib/helpers";
 
-export default function Activity() {
+const Activity = () => {
   const [casts, setCasts] = useState<Cast[] | null>();
   const [transactions, setTransactions] = useState([]);
   const [users, setUsers] = useState<any>(null);
@@ -52,7 +50,7 @@ export default function Activity() {
   return (
     <div className="flex justify-center">
       {casts && users && (
-        <div className="flex flex-col gap-4 max-w-3xl">
+        <div className="flex flex-col gap-4 max-w-4xl">
           {transactions.map((tx: any, i: number) => {
             const cast = casts.find((cast) => cast.hash === tx.castHash)!;
             const sender = users[tx.sender.toLowerCase()][0];
@@ -98,4 +96,6 @@ export default function Activity() {
       )}
     </div>
   );
-}
+};
+
+export default Activity;
