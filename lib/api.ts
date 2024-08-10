@@ -15,12 +15,15 @@ export const getCasts = async (castsHashes: string[]) => {
   return res.result.casts;
 };
 
+export const getUsers = async (addresses: string[]) =>
+  await neynar.fetchBulkUsersByEthereumAddress(addresses);
+
 export const getChannel = async (channelId: string) => {
   const res = await neynar.fetchBulkChannels([channelId]);
   return res.channels[0];
 };
 
-const queryData = async (query: string) => {
+export const queryData = async (query: string) => {
   const res = await fetch(apiEndpoint, {
     method: "POST",
     headers: {
