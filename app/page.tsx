@@ -2,11 +2,10 @@
 import Image from "next/image";
 import CastPreview from "./components/CastPreview";
 import { useEffect, useState } from "react";
-import { getCasts, getDetails } from "@/lib/api";
-import { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import Casts from "@/lib/casts";
+import { getActiveCasts, getCasts, getDetails } from "@/lib/api";
 import { useContext } from "react";
 import { RoundContext } from "./context/round";
+import { CastData } from "@/lib/types";
 
 const Home = () => {
   const round = useContext(RoundContext);
@@ -18,17 +17,22 @@ const Home = () => {
     transactionCount: 0,
     userCount: 0,
   });
-  const [casts, setCasts] = useState<Cast[]>(Casts as unknown as Cast[]);
+  const [casts, setCasts] = useState<CastData[] | null>(null);
 
   const fetchData = async () => {
     const response = await getDetails();
     setData(response);
 
-    // const response = await getCasts([
-    //   "0x02d3f308a0f56aa39766d9f66d5c40c9aefb47f9",
-    //   "0x5d4ef473e8826c5a13c4218a537953bd25ae5c9c",
-    // ]);
-    // setCasts(response);
+    const activeCastDetails = await getActiveCasts();
+    const activeCasts = await getCasts(
+      activeCastDetails.map((c: any) => c.castHash)
+    );
+    setCasts(activeCastDetails.map((c: any, i: number) => ({
+      // TODO: get social capital value
+      socialCapitalValue: 0,
+      price: c.price,
+      cast: activeCasts[i],
+    })));
   };
 
   useEffect(() => {
@@ -91,24 +95,26 @@ const Home = () => {
             </span>
           </div>
         </div>
-        <div className="flex-col pt-6 space-y-3">
-          {casts.map((cast: Cast, i: number) => (
-            <div
-              className={`p-4 rounded bg-slate-200 ${
-                i === 0
-                  ? "border-amber-400"
-                  : i === 1
-                  ? "border-slate-400"
-                  : i === 2
-                  ? "border-yellow-700"
-                  : "border-slate-900"
-              }`}
-              key={cast.hash}
-            >
-              <CastPreview cast={cast} />
-            </div>
-          ))}
-        </div>
+        {casts && (
+          <div className="flex-col pt-6 space-y-4">
+            {casts.map((castData: CastData, i: number) => (
+              <div
+                className={`p-4 rounded bg-slate-200 ${
+                  i === 0
+                    ? "border-amber-400"
+                    : i === 1
+                    ? "border-slate-400"
+                    : i === 2
+                    ? "border-yellow-700"
+                    : "border-slate-900"
+                }`}
+                key={castData.cast.hash}
+              >
+                <CastPreview castData={castData} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
