@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 import { getCasts, getDetails } from "@/lib/api";
 import { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import Casts from "@/lib/casts";
+import { useContext } from "react";
+import { RoundContext } from "./context/round";
 
 const Home = () => {
-  const gameTitle = "Testnet Demo Competition";
+  const round = useContext(RoundContext);
   const endsIn = "-";
 
   const [sortBy, setSortBy] = useState("score");
@@ -36,7 +38,7 @@ const Home = () => {
   return (
     <div className="flex flex-col justify-center text-black">
       <div className="flex rounded items-center justify-center w-full flex-col p-8 bg-slate-200 rounded">
-        <h1 className="text-3xl font-bold">{gameTitle}</h1>
+        <h1 className="text-3xl font-bold">{round?.title}</h1>
 
         <div className="flex items-center gap-4 my-7">
           <div className="flex flex-col items-center rounded px-6 py-3 bg-slate-300 rounded">

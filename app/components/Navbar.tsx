@@ -3,8 +3,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { getChannel } from "@/lib/api";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Channel } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import { useContext } from "react";
+import { RoundContext } from "../context/round";
 
 const links = [
   { href: "/", label: "Overview" },
@@ -13,20 +15,20 @@ const links = [
 ];
 
 const Navbar = () => {
-  // TODO: get from db
+  const round = useContext(RoundContext);
+
   const pathname = usePathname();
-  const channelId = "castgame";
   const [channel, setChannel] = useState<Channel | null>(null);
 
   const fetchChannel = async () => {
-    const response = await getChannel(channelId);
+    const response = await getChannel(round!.channelId);
     setChannel(response);
   };
 
   useEffect(() => {
     fetchChannel();
-  }, []);
-  
+  }, [round]);
+
   return (
     <nav className="p-3 flex justify-between items-center absolute top-0 w-full">
       <a href={`https://warpcast.com/~/channel/${channel?.id}`} target="_black">
@@ -39,7 +41,7 @@ const Navbar = () => {
             height={30}
             className="rounded-full"
           />
-          <span className="text-lg font-bold">/{channelId}</span>
+          <span className="text-lg font-bold">/{channel?.id}</span>
         </div>
       </a>
       <div className="flex gap-5 items-center">
