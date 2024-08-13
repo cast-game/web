@@ -1,4 +1,3 @@
-import { BulkCastsSortType } from "@neynar/nodejs-sdk/build/neynar-api/common/constants";
 import { NeynarV2APIClient } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { config } from "dotenv";
 import { apiEndpoint, gameAddress, priceTiers } from "./constants";
@@ -93,11 +92,12 @@ export const getDetails = async (): Promise<Details> => {
   };
 };
 
-export const getSCVQuery = (castHash: string) => `{
+export const getSCVQuery = (castsHashes: string[]) => `{
   FarcasterCasts(
-    input: {filter: {hash: {_eq: "${castHash}"}}, blockchain: ALL}
+    input: {filter: {hash: {_in: ${JSON.stringify(castsHashes)}}}, blockchain: ALL}
   ) {
     Cast {
+      hash
       socialCapitalValue {
         formattedValue
       }

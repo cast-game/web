@@ -2,17 +2,19 @@
 import Image from "next/image";
 import CastPreview from "./components/CastPreview";
 import { useEffect, useState } from "react";
-import { getActiveCasts, getCasts, getDetails } from "@/lib/api";
+import { getActiveCasts, getCasts, getDetails, getSCVQuery } from "@/lib/api";
 import { useContext } from "react";
 import { RoundContext } from "./context/round";
 import { CastData } from "@/lib/types";
+import { fetchQuery, init } from "@airstack/airstack-react";
+init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const Home = () => {
   const round = useContext(RoundContext);
   const endsIn = "-";
 
   const [sortBy, setSortBy] = useState("score");
-  const [data, setData] = useState({
+  const [details, setDetails] = useState({
     rewardPool: "0",
     transactionCount: 0,
     userCount: 0,
@@ -21,18 +23,55 @@ const Home = () => {
 
   const fetchData = async () => {
     const response = await getDetails();
-    setData(response);
+    setDetails(response);
 
     const activeCastDetails = await getActiveCasts();
     const activeCasts = await getCasts(
       activeCastDetails.map((c: any) => c.castHash)
     );
-    setCasts(activeCastDetails.map((c: any, i: number) => ({
-      // TODO: get social capital value
-      socialCapitalValue: 0,
-      price: c.price,
-      cast: activeCasts[i],
-    })));
+
+    const castHashes = activeCastDetails.map((c: any) => c.castHash);
+
+    const { data, error } = await fetchQuery(getSCVQuery(castHashes));
+    const castScores = data.FarcasterCasts.Cast.map((cast: any) => {
+      const scv =
+        cast.socialCapitalValue !== null
+          ? cast.socialCapitalValue.formattedValue.toFixed(2)
+          : 0;
+
+      const notaTokenEarned =
+        cast.notaTokenEarned !== null
+          ? cast.notaTokenEarned.formattedValue.toFixed(2)
+          : 0;
+
+      // round to 2 decimal places if < 10
+      const score = (Number(scv) + Number(notaTokenEarned)).toFixed(2);
+      if (Number(score) < 10) {
+        return {
+          hash: cast.hash,
+          score: score,
+        };
+      } 
+      return {
+        hash: cast.hash,
+        score: Math.ceil(Number(score)),
+      }
+    }).sort((a: any, b: any) => b.score - a.score);
+
+    setCasts(
+      castScores.map((c: any, i: number) => {
+        const price = activeCastDetails.find(
+          (cast: any) => cast.castHash === c.hash
+        ).price;
+        const cast = activeCasts.find((cast: any) => cast.hash === c.hash);
+
+        return {
+          socialCapitalValue: c.score,
+          price,
+          cast,
+        };
+      })
+    );
   };
 
   useEffect(() => {
@@ -53,18 +92,20 @@ const Home = () => {
                 height={27}
                 alt="Ethereum logo"
               />
-              <span className="text-3xl font-bold">{data.rewardPool}</span>
+              <span className="text-3xl font-bold">{details.rewardPool}</span>
             </div>
             <span className="text-lg">reward pool</span>
           </div>
 
           <div className="flex flex-col items-center px-6 py-3 bg-slate-300 rounded">
-            <span className="text-3xl font-bold">{data.transactionCount}</span>
+            <span className="text-3xl font-bold">
+              {details.transactionCount}
+            </span>
             <span className="text-lg">transactions</span>
           </div>
 
           <div className="flex flex-col items-center px-6 py-3 bg-slate-300 rounded">
-            <span className="text-3xl font-bold">{data.userCount}</span>
+            <span className="text-3xl font-bold">{details.userCount}</span>
             <span className="text-lg">participants</span>
           </div>
         </div>
