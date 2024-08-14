@@ -1,49 +1,135 @@
 "use client";
 import Image from "next/image";
-import Casts from "@/lib/casts";
 import { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import { useState } from "react";
-import { formatEther } from "viem";
 import CastPreview from "../components/CastPreview";
+import { usePrivy } from "@privy-io/react-auth";
+import { useEffect, useState } from "react";
+import {
+	getCasts,
+	getSCVQuery,
+	getUsers,
+	handleSCVData,
+	queryData,
+} from "@/lib/api";
+import { fetchQuery, init } from "@airstack/airstack-react";
+import { CastData } from "@/lib/types";
+init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const Tickets = () => {
-  const [casts, setCasts] = useState<Cast[] | null>(Casts as unknown as Cast[]);
+	const { user } = usePrivy();
+	const [data, setData] = useState<CastData[]>([]);
+	// const [casts, setCasts] = useState<Cast[] | null>(Casts as unknown as Cast[]);
 
-  return (
-    <div className="flex justify-center">
-      <div className="flex flex-col gap-4 max-w-4xl">
-        {casts?.map((cast: Cast, i: number) => {
-          return (
-            <div className="p-3 bg-zinc-300 rounded" key={i}>
-              <div className="flex items-center text-black justify-between">
-                <div className="flex items-center text-lg font-bold">
-                  <div className="flex gap-3 items-center">
-                    <div className="flex text-xl items-center gap-1 text-black font-bold py-1 px-3 bg-black/20 rounded justify-center">
-                      <Image
-                        src="/eth-logo.png"
-                        width={20}
-                        height={20}
-                        alt="Ethereum logo"
-                      />
-                      <span>2.1</span>
-                    </div>
-                    <span className="text-lime-600">+100%</span>
-                  </div>
-                </div>
-                <span className="text-lg font-bold">2x</span>
-              </div>
-              <div
-                className={`p-4 rounded bg-slate-200 w-full mt-3`}
-                key={cast.hash}
-              >
-                <CastPreview cast={cast} showPrice={false} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+	const fetchData = async () => {
+		const res = await getUsers([user!.farcaster?.fid!]);
+		const userData = res.users[0];
+		const addresses = [
+			userData.custody_address,
+			...userData.verified_addresses.eth_addresses,
+		];
+
+		const results = await Promise.all(
+			addresses.map(async (address: string) => {
+				const output = await queryData(`{
+          users(
+            where: {
+              id_starts_with: "${address}"
+              ticketBalance_gt: "0"
+            }
+          ) {
+            items {
+              ticketBalance
+              id
+            }
+          }
+        }`);
+				return output.users.items;
+			})
+		);
+
+		let balances: any[] = [];
+		results.forEach((items) => {
+			items.forEach((item: any) => {
+				const castHash = item.id.split(":")[1];
+				const existingEntry = balances.find(
+					(entry) => entry.castHash === castHash
+				);
+				if (existingEntry) {
+					return (existingEntry.balance += Number(item.ticketBalance));
+				}
+				balances.push({ castHash, balance: Number(item.ticketBalance) });
+			});
+		});
+
+		const castsHashes = balances.map((b) => b.castHash);
+
+		const [scvRes, castsRes, ticketsRes] = await Promise.all([
+			fetchQuery(getSCVQuery(castsHashes)),
+			getCasts(castsHashes),
+			queryData(`{
+        tickets(where: { id_in: "${castsHashes.toString()}" }) {
+          items {
+            activeTier
+            supply
+            id
+          }
+        }`),
+		]);
+
+		const castScores = handleSCVData(scvRes.data.FarcasterCasts.Cast);
+    console.log(ticketsRes);
+
+		const castData: CastData[] = castScores.map((c: any, i: number) => {
+			const balance = balances.find((b) => b.castHash === c.hash)?.balance;
+			const cast = castsRes.find((cast) => cast.hash === c.hash);
+			return {
+				socialCapitalValue: c.score,
+				balance,
+				cast,
+			};
+		});
+		setData(castData);
+	};
+
+	useEffect(() => {
+		if (user) fetchData();
+	}, [user]);
+
+	return (
+		<div className="flex justify-center">
+			<div className="flex flex-col gap-4 max-w-4xl">
+				{data.map((castData: CastData, i: number) => {
+					return (
+						<div className="p-3 bg-zinc-300 rounded" key={i}>
+							<div className="flex items-center text-black justify-between">
+								<div className="flex items-center text-lg font-bold">
+									<div className="flex gap-3 items-center">
+										<div className="flex text-xl items-center gap-1 text-black font-bold py-1 px-3 bg-black/20 rounded justify-center">
+											<Image
+												src="/eth-logo.png"
+												width={20}
+												height={20}
+												alt="Ethereum logo"
+											/>
+											<span>2.1</span>
+										</div>
+										<span className="text-lime-600">+100%</span>
+									</div>
+								</div>
+								<span className="text-lg font-bold">{`${castData.balance}x`}</span>
+							</div>
+							<div
+								className={`p-4 rounded bg-slate-200 w-full mt-3`}
+								key={castData.cast.hash}
+							>
+								<CastPreview castData={castData} showPrice={false} />
+							</div>
+						</div>
+					);
+				})}
+			</div>
+		</div>
+	);
 };
 
 export default Tickets;
