@@ -38,8 +38,8 @@ export const getActiveCasts = async () => {
   }));
 };
 
-export const getUsers = async (addresses: string[]) =>
-  await neynar.fetchBulkUsersByEthereumAddress(addresses);
+export const getUsers = async (fids: number[]) =>
+  await neynar.fetchBulkUsers(fids);
 
 export const getChannel = async (channelId: string) => {
   const res = await neynar.fetchBulkChannels([channelId]);
