@@ -1,4 +1,4 @@
-export const gameAddress = "0x95Fe2f778BA3DA6116636860bf40aC12C41b813E";
+export const gameAddress = "0x1db3D1955E9De53cAE51EE196A0f56ea6e390DfF";
 export const apiEndpoint = "https://api-production-9d5d.up.railway.app/";
 
 // in $DEGEN
