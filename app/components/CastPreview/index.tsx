@@ -21,6 +21,7 @@ interface Props {
 }
 
 const CastPreview = ({ castData, showPrice = true }: Props) => {
+  if (!castData) return null;
   const { cast, socialCapitalValue, price } = castData;
 
   const timeSince = getTimeSince(

@@ -46,6 +46,32 @@ export const getChannel = async (channelId: string) => {
   return res.channels[0];
 };
 
+export const handleSCVData = (data: any) =>
+  data.map((cast: any) => {
+    const scv =
+      cast.socialCapitalValue !== null
+        ? cast.socialCapitalValue.formattedValue.toFixed(2)
+        : 0;
+
+    const notaTokenEarned =
+      cast.notaTokenEarned !== null
+        ? cast.notaTokenEarned.formattedValue.toFixed(2)
+        : 0;
+
+    // round to 2 decimal places if < 10
+    const score = (Number(scv) + Number(notaTokenEarned)).toFixed(2);
+    if (Number(score) < 10) {
+      return {
+        hash: cast.hash,
+        score: score,
+      };
+    }
+    return {
+      hash: cast.hash,
+      score: Math.ceil(Number(score)),
+    };
+  });
+
 export const queryData = async (query: string) => {
   const res = await fetch(apiEndpoint, {
     method: "POST",
@@ -94,7 +120,9 @@ export const getDetails = async (): Promise<Details> => {
 
 export const getSCVQuery = (castsHashes: string[]) => `{
   FarcasterCasts(
-    input: {filter: {hash: {_in: ${JSON.stringify(castsHashes)}}}, blockchain: ALL}
+    input: {filter: {hash: {_in: ${JSON.stringify(
+      castsHashes
+    )}}}, blockchain: ALL}
   ) {
     Cast {
       hash

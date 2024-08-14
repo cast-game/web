@@ -1,14 +1,22 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import { getCasts, getUsers, queryData } from "@/lib/api";
+import {
+  getCasts,
+  getSCVQuery,
+  getUsers,
+  handleSCVData,
+  queryData,
+} from "@/lib/api";
 import CastPreview from "../components/CastPreview";
 import { formatEther } from "viem";
 import { getTimeSince } from "@/lib/helpers";
+import { CastData } from "@/lib/types";
+import { fetchQuery, init } from "@airstack/airstack-react";
+init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const Activity = () => {
-  const [casts, setCasts] = useState<Cast[] | null>();
+  const [casts, setCasts] = useState<CastData[]>();
   const [transactions, setTransactions] = useState([]);
   const [users, setUsers] = useState<any>(null);
 
@@ -33,7 +41,22 @@ const Activity = () => {
     const castsRes = await getCasts(
       response.transactions.items.map((tx: any) => tx.castHash)
     );
-    setCasts(castsRes);
+
+    const { data, error } = await fetchQuery(
+      getSCVQuery(castsRes.map((c: any) => c.hash))
+    );
+    const castScores = handleSCVData(data.FarcasterCasts.Cast);
+
+    setCasts(
+      castsRes.map((cast: any, i: number) => {
+        return {
+          cast,
+          price: 0,
+          socialCapitalValue: castScores.find((c: any) => c.hash === cast.hash)
+            .score,
+        };
+      })
+    );
 
     const addresses = Array.from(
       new Set(response.transactions.items.map((tx: any) => tx.sender))
@@ -52,7 +75,9 @@ const Activity = () => {
       {casts && users && (
         <div className="flex flex-col gap-4 max-w-4xl">
           {transactions.map((tx: any, i: number) => {
-            const cast = casts.find((cast) => cast.hash === tx.castHash)!;
+            const cast = casts
+              .map((c: any) => c.cast)
+              .find((c: any) => c.hash === tx.castHash);
             const sender = users[tx.sender.toLowerCase()][0];
             const timeSince = getTimeSince(tx.timestamp);
 
@@ -78,7 +103,8 @@ const Activity = () => {
                       </div>
                     </a>
                     <span>
-                      purchased for <b>{formatEther(BigInt(tx.price))} ETH</b>
+                      {tx.type === "buy" ? "purchased" : "sold"} for{" "}
+                      <b>{formatEther(BigInt(tx.price))} ETH</b>
                     </span>
                   </div>
                   <span className="text-sm">{timeSince}</span>
@@ -87,7 +113,7 @@ const Activity = () => {
                   className={`p-4 rounded bg-slate-200 w-full mt-3`}
                   key={cast.hash}
                 >
-                  <CastPreview cast={cast} showPrice={false} />
+                  <CastPreview castData={casts[i]} showPrice={false} />
                 </div>
               </div>
             );

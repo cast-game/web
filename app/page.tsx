@@ -2,7 +2,13 @@
 import Image from "next/image";
 import CastPreview from "./components/CastPreview";
 import { useEffect, useState } from "react";
-import { getActiveCasts, getCasts, getDetails, getSCVQuery } from "@/lib/api";
+import {
+  getActiveCasts,
+  getCasts,
+  getDetails,
+  getSCVQuery,
+  handleSCVData,
+} from "@/lib/api";
 import { useContext } from "react";
 import { RoundContext } from "./context/round";
 import { CastData } from "@/lib/types";
@@ -33,30 +39,9 @@ const Home = () => {
     const castHashes = activeCastDetails.map((c: any) => c.castHash);
 
     const { data, error } = await fetchQuery(getSCVQuery(castHashes));
-    const castScores = data.FarcasterCasts.Cast.map((cast: any) => {
-      const scv =
-        cast.socialCapitalValue !== null
-          ? cast.socialCapitalValue.formattedValue.toFixed(2)
-          : 0;
-
-      const notaTokenEarned =
-        cast.notaTokenEarned !== null
-          ? cast.notaTokenEarned.formattedValue.toFixed(2)
-          : 0;
-
-      // round to 2 decimal places if < 10
-      const score = (Number(scv) + Number(notaTokenEarned)).toFixed(2);
-      if (Number(score) < 10) {
-        return {
-          hash: cast.hash,
-          score: score,
-        };
-      } 
-      return {
-        hash: cast.hash,
-        score: Math.ceil(Number(score)),
-      }
-    }).sort((a: any, b: any) => b.score - a.score);
+    const castScores = handleSCVData(data.FarcasterCasts.Cast).sort(
+      (a: any, b: any) => b.score - a.score
+    );
 
     setCasts(
       castScores.map((c: any, i: number) => {
