@@ -10,7 +10,7 @@ import {
   handleSCVData,
 } from "@/lib/api";
 import { useContext } from "react";
-import { RoundContext } from "./context/round";
+import { RoundContext } from "./context/provider";
 import { CastData } from "@/lib/types";
 import { fetchQuery, init } from "@airstack/airstack-react";
 init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);

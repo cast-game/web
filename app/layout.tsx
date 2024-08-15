@@ -3,7 +3,7 @@ import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "./components/Navbar";
-import { ProviderWrapper } from "./context/round";
+import { ProviderWrapper } from "./context/provider";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
