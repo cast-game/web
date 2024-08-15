@@ -145,7 +145,7 @@ const Home = () => {
 						{casts.map((castData: CastData, i: number) => (
 							<div
 								key={castData.cast.hash}
-								className="p-4 rounded bg-slate-200"
+								className="p-4 rounded hover:bg-slate-200/95 bg-slate-200 hover:outline outline-4 outline-purple-700"
 							>
 								<CastPreview castData={castData} />
 							</div>

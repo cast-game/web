@@ -43,12 +43,12 @@ const Navbar = () => {
 				<div className="rounded-full h-2 w-2 bg-green-500" />
 				<Image
 					src={channel?.image_url!}
-					alt={"/" + channel?.id}
+					alt={"/" + round?.channelId}
 					width={30}
 					height={30}
 					className="rounded-full"
 				/>
-				<span className="text-lg font-bold">/{channel?.id}</span>
+				<span className="text-lg font-bold">/{round?.channelId}</span>
 			</a>
 
 			<div className="flex gap-5 items-center">

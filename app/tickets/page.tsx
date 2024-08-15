@@ -117,7 +117,9 @@ const Tickets = () => {
 										{/* <span className="text-lime-600">+100%</span> */}
 									</div>
 								</div>
-								<span className="text-lg font-bold">{`${castData.balance}x`}</span>
+								{castData.balance! > 1 && (
+									<span className="text-lg font-bold">{`${castData.balance}x`}</span>
+								)}
 							</div>
 							<div
 								className={`p-4 rounded bg-slate-200 w-full mt-3`}
