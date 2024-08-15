@@ -13,6 +13,7 @@ import {
 } from "@/lib/api";
 import { fetchQuery, init } from "@airstack/airstack-react";
 import { CastData } from "@/lib/types";
+import { formatEther } from "viem";
 init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const Tickets = () => {
@@ -62,30 +63,30 @@ const Tickets = () => {
 		});
 
 		const castsHashes = balances.map((b) => b.castHash);
-
 		const [scvRes, castsRes, ticketsRes] = await Promise.all([
 			fetchQuery(getSCVQuery(castsHashes)),
 			getCasts(castsHashes),
 			queryData(`{
-        tickets(where: { id_in: "${castsHashes.toString()}" }) {
+        tickets(where: { id_in: ${JSON.stringify(castsHashes)} }) {
           items {
-            activeTier
-            supply
+            buyPrice
             id
           }
-        }`),
+        }
+			}`),
 		]);
 
 		const castScores = handleSCVData(scvRes.data.FarcasterCasts.Cast);
-    console.log(ticketsRes);
 
 		const castData: CastData[] = castScores.map((c: any, i: number) => {
+			const ticket = ticketsRes.tickets.items.find((t: any) => t.id === c.hash);
 			const balance = balances.find((b) => b.castHash === c.hash)?.balance;
 			const cast = castsRes.find((cast) => cast.hash === c.hash);
 			return {
 				socialCapitalValue: c.score,
 				balance,
 				cast,
+				price: formatEther(ticket.buyPrice),
 			};
 		});
 		setData(castData);
@@ -111,9 +112,9 @@ const Tickets = () => {
 												height={20}
 												alt="Ethereum logo"
 											/>
-											<span>2.1</span>
+											<span>{castData.price}</span>
 										</div>
-										<span className="text-lime-600">+100%</span>
+										{/* <span className="text-lime-600">+100%</span> */}
 									</div>
 								</div>
 								<span className="text-lg font-bold">{`${castData.balance}x`}</span>
