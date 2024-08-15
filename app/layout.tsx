@@ -38,7 +38,7 @@ export default async function RootLayout({
 				<ProviderWrapper value={currentRound}>
 					<Navbar />
 					<main className="flex pt-20 justify-center">
-						<div className="max-w-4xl w-full p-5">{children}</div>
+						<div className="max-w-4xl w-full sm:p-5">{children}</div>
 					</main>
 				</ProviderWrapper>
 			</body>

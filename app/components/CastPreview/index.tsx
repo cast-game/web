@@ -50,63 +50,61 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
       target="_blank"
       rel="noopener noreferrer"
     >
-      <div className="flex flex-col md:flex-row w-full justify-between gap-4 md:gap-6" key={cast.hash}>
-        <div className="flex">
-          <Avatar className="mr-3 shrink-0">
-            <AvatarImage src={cast.author.pfp_url} />
-            <AvatarFallback>@{cast.author.username}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col text-black sm:text-lg text-md">
+      <div className="flex" key={cast.hash}>
+        <Avatar className="mr-3 shrink-0 sm:h-11 sm:w-11 h-10 w-10">
+          <AvatarImage src={cast.author.pfp_url} />
+          <AvatarFallback>@{cast.author.username}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col text-black w-full">
+          <div className="flex justify-between items-center mb-1 text-md">
             <div className="flex flex-wrap items-center">
-              <p className="font-semibold mr-1.5">{cast.author.display_name}</p>
+              <p className="font-semibold mr-1">{cast.author.display_name}</p>
               <p className="font-medium text-gray-600">
                 @{cast.author.username} · {timeSince}
               </p>
             </div>
-            <p className="font-medium pr-3 line-clamp-3 mb-2">
-              {cast.text.replace(/https?:\/\/\S+/i, "")}
-            </p>
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-xs flex self-end items-center justify-center px-2 py-1 bg-gradient-to-r from-[#45A3B8] to-[#23B68A] text-white font-semibold rounded">
+                    {socialCapitalValue}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Social Capital Value represents Lorem Ipsum.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <p className="font-medium pr-10 line-clamp-3 mb-2 text-sm">
+            {cast.text.replace(/https?:\/\/\S+/i, "")}
+          </p>
+          <div className="flex justify-between items-center">
             <div className="flex flex-wrap gap-2">
               {embeds.map((embed: string) => (
                 <div
                   key={embed}
-                  className="flex items-center font-medium rounded-full px-3 py-1 text-sm bg-black/20"
+                  className="flex items-center font-medium rounded-full px-2 py-1 text-xs bg-black/20"
                 >
                   + {embed}
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-        <div className="flex md:flex-col items-center sm:justify-between justify-end ml-3 gap-3 md:gap-0">
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="text-sm flex self-end items-center justify-center sm:mb-2 px-3 py-1 bg-gradient-to-r from-[#45A3B8] to-[#23B68A] text-white font-semibold rounded-full">
-                  {socialCapitalValue}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Social Capital Value represents Lorem Ipsum.</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          {showPrice && (
-            <div className="flex items-center gap-1 text-xl text-black font-bold py-1 px-3 bg-black/20 rounded justify-center">
+            {showPrice && <div className="flex items-center gap-1 text-md text-black font-bold py-1 px-2 bg-slate-400 rounded justify-center">
               <Image
                 src="/eth-logo.png"
-                width={20}
-                height={20}
+                width={17}
+                height={17}
                 alt="Ethereum logo"
               />
               <span className="text-clip">{price}</span>
-            </div>
-          )}
+            </div>}
+          </div>
         </div>
+
       </div>
     </Link>
   );
-  
 };
 
 export default CastPreview;
