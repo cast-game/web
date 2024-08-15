@@ -1,12 +1,8 @@
 // "use client"
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import type { Cast, User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { getTimeSince } from "@/lib/helpers";
-// import { BadgeInfo } from "lucide-react";
-// import { getTicketInfo } from "@/lib/api";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -33,17 +29,6 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
     return "quote";
   });
 
-  // const [ticketInfo, setTicketInfo] = useState<any>(null);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const res = await getTicketInfo(cast);
-  //     setTicketInfo(res);
-  //     console.log(ticketInfo);
-  //   };
-  //   fetchData();
-  // }, []);
-
   return (
     <Link
       href={`https://warpcast.com/${cast.author.username}/${cast.hash}`}
@@ -56,7 +41,7 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
           <AvatarFallback>@{cast.author.username}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col text-black w-full">
-          <div className="flex justify-between items-center mb-1 text-md">
+          <div className="flex items-start justify-between mb-1 sm:text-md text-sm">
             <div className="flex flex-wrap items-center">
               <p className="font-semibold mr-1">{cast.author.display_name}</p>
               <p className="font-medium text-gray-600">
@@ -66,7 +51,7 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="text-xs flex self-end items-center justify-center px-2 py-1 bg-gradient-to-r from-[#45A3B8] to-[#23B68A] text-white font-semibold rounded">
+                  <div className="text-xs flex items-center justify-center px-2 py-1 bg-gradient-to-r from-[#45A3B8] to-[#23B68A] text-white font-semibold rounded">
                     {socialCapitalValue}
                   </div>
                 </TooltipTrigger>
@@ -76,7 +61,7 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <p className="font-medium pr-10 line-clamp-3 mb-2 text-sm">
+          <p className="font-medium pr-12 line-clamp-3 mb-2 text-sm">
             {cast.text.replace(/https?:\/\/\S+/i, "")}
           </p>
           <div className="flex justify-between items-center">
