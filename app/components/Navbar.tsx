@@ -7,13 +7,12 @@ import { getChannel } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { Channel } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import { RoundContext } from "../context/round";
+import { RoundContext } from "../context/provider";
 import { usePrivy } from "@privy-io/react-auth";
 
 const links = [
 	{ href: "/", label: "Overview" },
 	{ href: "/activity", label: "Activity" },
-	{ href: "/tickets", label: "My Tickets" },
 ];
 
 const Navbar = () => {
@@ -30,7 +29,7 @@ const Navbar = () => {
 
 	useEffect(() => {
 		fetchChannel();
-	}, [round]);
+	}, []);
 
 	return (
 		<nav className="p-3 flex justify-between items-center absolute top-0 w-full">
@@ -61,6 +60,16 @@ const Navbar = () => {
 						{label}
 					</Link>
 				))}
+				{user && <Link
+						href={"/tickets"}
+						className={
+							pathname === "/tickets"
+								? "opacity-100"
+								: "opacity-75 hover:opacity-100 focus:opacity-100"
+						}
+					>
+						My Tickets
+					</Link>}
 				{user ? (
 					<div className="flex gap-2 items-center">
 						<a
@@ -94,7 +103,7 @@ const Navbar = () => {
 						onClick={() => login({ loginMethods: ["farcaster"] })}
 						className="flex bg-indigo-600 rounded px-5 py-2 cursor-pointer font-medium hover:bg-indigo-600/90"
 					>
-						Sign In With Warpcast
+						Sign In
 					</div>
 				)}
 			</div>
