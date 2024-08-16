@@ -15,6 +15,7 @@ import { RoundContext } from "./context/provider";
 import { CastData } from "@/lib/types";
 import { fetchQuery, init } from "@airstack/airstack-react";
 import { Channel } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import { Spinner } from "@radix-ui/themes";
 init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const Home = () => {
@@ -106,13 +107,17 @@ const Home = () => {
 					rel="noopener noreferrer"
 					className="flex items-center ml-4 gap-2"
 				>
-					<Image
-						src={channel?.image_url!}
-						alt={"/" + round?.channelId}
-						width={30}
-						height={30}
-						className="rounded-full"
-					/>
+					{channel ? (
+						<Image
+							src={channel?.image_url!}
+							alt={"/" + round?.channelId}
+							width={28}
+							height={28}
+							className="rounded-full"
+						/>
+					) : (
+						<div className="h-7 w-7 rounded-full bg-slate-500/50 animate-pulse"></div>
+					)}
 					<span className="text-lg font-bold">/{round?.channelId}</span>
 				</a>
 			</div>
@@ -134,7 +139,7 @@ const Home = () => {
 				/>
 				<StatBox label="transactions" value={details?.transactionCount} />
 				<StatBox label="participants" value={details?.userCount} />
-        <StatBox label="game ends" value="23:59:59" />
+				<StatBox label="game ends" value="23:59:59" />
 			</div>
 
 			<div className="mt-6 sm:mt-10 gap-4">
@@ -171,10 +176,8 @@ const Home = () => {
 						))}
 					</div>
 				) : (
-					<div className="flex flex-col pt-6 space-y-4">
-						<div className="h-24 bg-slate-500/50 animate-pulse rounded"></div>
-						<div className="h-24 bg-slate-500/50 animate-pulse rounded"></div>
-						<div className="h-24 bg-slate-500/50 animate-pulse rounded"></div>
+					<div className="flex justify-center items-center pt-16">
+						<Spinner size="3" />
 					</div>
 				)}
 			</div>

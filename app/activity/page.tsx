@@ -14,6 +14,7 @@ import { getTimeSince } from "@/lib/helpers";
 import { CastData } from "@/lib/types";
 import { fetchQuery, init } from "@airstack/airstack-react";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
+import { Spinner } from "@radix-ui/themes";
 init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const Activity = () => {
@@ -126,11 +127,9 @@ const Activity = () => {
 						);
 					})
 				) : (
-					<>
-						<div className="h-32 bg-slate-500/50 animate-pulse rounded"></div>
-						<div className="h-32 bg-slate-500/50 animate-pulse rounded"></div>
-						<div className="h-32 bg-slate-500/50 animate-pulse rounded"></div>
-					</>
+					<div className="flex justify-center items-center pt-16">
+						<Spinner size="3"/>
+					</div>
 				)}
 			</div>
 		</div>

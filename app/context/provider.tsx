@@ -2,6 +2,7 @@
 import { Round } from "@prisma/client";
 import { createContext, ReactNode, useState } from "react";
 import { PrivyProvider } from "@privy-io/react-auth";
+import { Theme } from '@radix-ui/themes';
 
 export const RoundContext = createContext<Round | null>(null);
 
@@ -15,10 +16,11 @@ export const ProviderWrapper = ({ children, value }: Props) => {
 
 	return (
 		<RoundContext.Provider value={round}>
-			<PrivyProvider
-				appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
-			>
-				{children}
+			<PrivyProvider appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}>
+				<Theme
+					hasBackground={false}
+					appearance="dark"
+				>{children}</Theme>
 			</PrivyProvider>
 		</RoundContext.Provider>
 	);
