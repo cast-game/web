@@ -1,6 +1,5 @@
 "use client";
 import Image from "next/image";
-import { Cast } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import CastPreview from "../components/CastPreview";
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
@@ -20,7 +19,6 @@ init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 const Tickets = () => {
 	const { user } = usePrivy();
 	const [data, setData] = useState<CastData[] | null>(null);
-	// const [casts, setCasts] = useState<Cast[] | null>(Casts as unknown as Cast[]);
 
 	const fetchData = async () => {
 		const res = await getUsers([user!.farcaster?.fid!]);

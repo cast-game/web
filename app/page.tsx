@@ -20,7 +20,6 @@ init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const Home = () => {
 	const round = useContext(RoundContext);
-	const endsIn = "-";
 
 	const [sortBy, setSortBy] = useState("score");
 	const [details, setDetails] = useState<any>(null);
@@ -29,27 +28,29 @@ const Home = () => {
 	const [loading, setLoading] = useState(true);
 
 	const fetchData = async () => {
-		const response = await getDetails();
-		setDetails(response);
+    const [details, channel, activeCastDetails] = await Promise.all([
+      getDetails(),
+      getChannel(round?.channelId!),
+      getActiveCasts(),
+    ]);
+
+		setDetails(details);
+		setChannel(channel);
 		setLoading(false);
 
-		const channelRes = await getChannel(round?.channelId!);
-		setChannel(channelRes);
+    const castsHashes = activeCastDetails.map((c: any) => c.castHash);
 
-		const activeCastDetails = await getActiveCasts();
-		const activeCasts = await getCasts(
-			activeCastDetails.map((c: any) => c.castHash)
-		);
+    const [activeCasts, scvQueryRes] = await Promise.all([
+      getCasts(castsHashes),
+      fetchQuery(getSCVQuery(castsHashes)),
+    ]);
 
-		const castHashes = activeCastDetails.map((c: any) => c.castHash);
-
-		const { data, error } = await fetchQuery(getSCVQuery(castHashes));
-		const castScores = handleSCVData(data.FarcasterCasts.Cast).sort(
+		const castScores = handleSCVData(scvQueryRes.data.FarcasterCasts.Cast).sort(
 			(a: any, b: any) => b.score - a.score
 		);
 
 		setCasts(
-			castScores.map((c: any, i: number) => {
+			castScores.map((c: any) => {
 				const price = activeCastDetails.find(
 					(cast: any) => cast.castHash === c.hash
 				).price;

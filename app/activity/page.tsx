@@ -41,15 +41,23 @@ const Activity = () => {
 			)
 		);
 
-		const castsRes = await getCasts(
-			response.transactions.items.map((tx: any) => tx.castHash)
+		const castsHashes = response.transactions.items.map(
+			(tx: any) => tx.castHash
 		);
 
-		const { data } = await fetchQuery(
-			getSCVQuery(castsRes.map((c: any) => c.hash))
-		);
-		const castScores = handleSCVData(data.FarcasterCasts.Cast);
+		const fids = Array.from(
+			new Set(response.transactions.items.map((tx: any) => tx.senderFid))
+		) as number[];
 
+		const [usersRes, castsRes, scvQueryData] = await Promise.all([
+			getUsers(fids),
+			getCasts(castsHashes),
+			fetchQuery(getSCVQuery(castsHashes)),
+		]);
+
+		const castScores = handleSCVData(scvQueryData.data.FarcasterCasts.Cast);
+
+		setUsers(usersRes.users);
 		setCasts(
 			castsRes.map((cast: any, i: number) => {
 				return {
@@ -60,14 +68,6 @@ const Activity = () => {
 				};
 			})
 		);
-
-		const fids = Array.from(
-			new Set(response.transactions.items.map((tx: any) => tx.senderFid))
-		) as number[];
-
-		const usersRes = await getUsers(fids);
-		console.log(usersRes.users);
-		setUsers(usersRes.users);
 	};
 
 	useEffect(() => {
@@ -128,7 +128,7 @@ const Activity = () => {
 					})
 				) : (
 					<div className="flex justify-center items-center pt-16">
-						<Spinner size="3"/>
+						<Spinner size="3" />
 					</div>
 				)}
 			</div>
