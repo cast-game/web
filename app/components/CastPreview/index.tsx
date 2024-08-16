@@ -40,8 +40,8 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
           <AvatarImage src={cast.author.pfp_url} />
           <AvatarFallback>@{cast.author.username}</AvatarFallback>
         </Avatar>
-        <div className="flex flex-col text-black w-full">
-          <div className="flex items-start justify-between mb-1 sm:text-md text-sm">
+        <div className="flex flex-col text-black w-full text-sm sm:text-base ">
+          <div className="flex items-start justify-between mb-1">
             <div className="flex flex-wrap items-center">
               <p className="font-semibold mr-1">{cast.author.display_name}</p>
               <p className="font-medium text-gray-600">
@@ -75,7 +75,7 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
                 </div>
               ))}
             </div>
-            {showPrice && <div className="flex items-center gap-1 text-md text-black font-bold py-1 px-2 bg-slate-400 rounded justify-center">
+            {showPrice && <div className="flex items-center gap-1 text-black font-bold py-1 px-2 bg-slate-400 rounded justify-center">
               <Image
                 src="/eth-logo.png"
                 width={17}
