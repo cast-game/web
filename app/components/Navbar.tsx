@@ -1,12 +1,11 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState, useContext } from "react";
+import Logo from "@/public/logo.png";
+import { useState, useContext } from "react";
 import { usePathname } from "next/navigation";
-import { getChannel } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { Channel } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { RoundContext } from "../context/provider";
 import { usePrivy } from "@privy-io/react-auth";
 
@@ -20,35 +19,22 @@ const Navbar = () => {
 	const { login, logout, user } = usePrivy();
 
 	const pathname = usePathname();
-	const [channel, setChannel] = useState<Channel | null>(null);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-	const fetchChannel = async () => {
-		const response = await getChannel(round!.channelId);
-		setChannel(response);
-	};
-
-	useEffect(() => {
-		fetchChannel();
-	}, []);
 
 	return (
 		<nav className="p-3 flex justify-between items-center absolute top-0 w-full shadow-md z-10">
 			<a
-				href={`https://warpcast.com/~/channel/${channel?.id}`}
+				href="https://cast.game/about"
 				target="_blank"
 				rel="noopener noreferrer"
-				className="flex items-center ml-4 gap-2"
+				className="flex items-center ml-4 gap-2 opacity-80 hover:opacity-100"
 			>
-				<div className="rounded-full h-2 w-2 bg-green-500" />
 				<Image
-					src={channel?.image_url!}
-					alt={"/" + round?.channelId}
+					src={Logo}
+					alt="cast.game"
 					width={30}
 					height={30}
-					className="rounded-full"
 				/>
-				<span className="text-lg font-bold">/{round?.channelId}</span>
 			</a>
 
 			<div className="flex gap-5 items-center">
