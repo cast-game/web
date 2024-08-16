@@ -25,10 +25,12 @@ const Home = () => {
 	const [details, setDetails] = useState<any>(null);
 	const [channel, setChannel] = useState<Channel | null>(null);
 	const [casts, setCasts] = useState<CastData[] | null>(null);
+	const [loading, setLoading] = useState(true);
 
 	const fetchData = async () => {
 		const response = await getDetails();
 		setDetails(response);
+		setLoading(false);
 
 		const channelRes = await getChannel(round?.channelId!);
 		setChannel(channelRes);
@@ -65,6 +67,27 @@ const Home = () => {
 		fetchData();
 	}, []);
 
+	interface StatBoxProps {
+		label: string;
+		value: any;
+		loading?: boolean;
+	}
+
+	const StatBox = ({ label, value }: StatBoxProps) => {
+		if (loading) {
+			return (
+				<div className="flex h-20 bg-slate-500/50 rounded flex-1 min-w-[150px] animate-pulse"></div>
+			);
+		}
+
+		return (
+			<div className="flex flex-col items-center justify-center px-6 py-4 bg-slate-200 rounded flex-1 min-w-[150px]">
+				<span className="text-2xl font-bold">{value}</span>
+				<span className="text-md">{label}</span>
+			</div>
+		);
+	};
+
 	return (
 		<div className="flex flex-col px-4 sm:px-8 w-full">
 			<div className="flex justify-between items-center mb-6 ">
@@ -93,36 +116,25 @@ const Home = () => {
 					<span className="text-lg font-bold">/{round?.channelId}</span>
 				</a>
 			</div>
-			<div className="flex flex-wrap rounded items-stretch gap-3 text-black">
+
+			<div className="flex flex-wrap items-stretch gap-3 text-black">
 				<StatBox
 					label="reward pool"
 					value={
-						details ? (
-							<div className="flex items-center gap-2">
-								<Image
-									src="/eth-logo.png"
-									width={25}
-									height={25}
-									alt="Ethereum logo"
-								/>
-								<span className="text-2xl font-bold">{details.rewardPool}</span>
-							</div>
-						) : null
+						<div className="flex items-center gap-2">
+							<Image
+								src="/eth-logo.png"
+								width={25}
+								height={25}
+								alt="Ethereum logo"
+							/>
+							<span className="text-2xl font-bold">{details?.rewardPool}</span>
+						</div>
 					}
 				/>
-
 				<StatBox label="transactions" value={details?.transactionCount} />
-
 				<StatBox label="participants" value={details?.userCount} />
-
-				<div className="flex-1 flex flex-col items-center justify-center px-6 py-3 bg-slate-200 rounded min-w-[150px]">
-					{details ? (
-						<span className="text-2xl font-bold">23:59:59</span>
-					) : (
-						<div className="h-7 w-full bg-grey-300 animate-pulse rounded"></div>
-					)}
-					<span className="text-md">game ends</span>
-				</div>
+        <StatBox label="game ends" value="23:59:59" />
 			</div>
 
 			<div className="mt-6 sm:mt-10 gap-4">
@@ -169,21 +181,5 @@ const Home = () => {
 		</div>
 	);
 };
-
-interface StatBoxProps {
-	label: string;
-	value: any;
-}
-
-const StatBox = ({ label, value }: StatBoxProps) => (
-	<div className="flex flex-col items-center justify-center px-6 py-4 bg-slate-200 rounded flex-1 min-w-[150px]">
-		{value !== undefined ? (
-			<span className="text-2xl font-bold">{value}</span>
-		) : (
-			<div className="h-9 w-full bg-grey-300 animate-pulse rounded"></div>
-		)}
-		<span className="text-md">{label}</span>
-	</div>
-);
 
 export default Home;

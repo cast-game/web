@@ -17,9 +17,9 @@ import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const Activity = () => {
-	const [casts, setCasts] = useState<CastData[]>();
-	const [transactions, setTransactions] = useState([]);
-	const [users, setUsers] = useState<User[]>();
+	const [casts, setCasts] = useState<CastData[] | null>(null);
+	const [transactions, setTransactions] = useState<any[] | null>(null);
+	const [users, setUsers] = useState<User[] | null>(null);
 
 	const fetchData = async () => {
 		const response = await queryData(`{
@@ -44,7 +44,7 @@ const Activity = () => {
 			response.transactions.items.map((tx: any) => tx.castHash)
 		);
 
-		const { data, error } = await fetchQuery(
+		const { data } = await fetchQuery(
 			getSCVQuery(castsRes.map((c: any) => c.hash))
 		);
 		const castScores = handleSCVData(data.FarcasterCasts.Cast);
@@ -65,7 +65,7 @@ const Activity = () => {
 		) as number[];
 
 		const usersRes = await getUsers(fids);
-    console.log(usersRes.users);
+		console.log(usersRes.users);
 		setUsers(usersRes.users);
 	};
 
@@ -75,19 +75,21 @@ const Activity = () => {
 
 	return (
 		<div className="flex justify-center">
-			{casts && users && (
-				<div className="flex flex-col gap-4 max-w-4xl">
-					{transactions.map((tx: any, i: number) => {
+			<div className="flex flex-col gap-4 w-full">
+				{transactions && casts && users ? (
+					transactions.map((tx: any, i: number) => {
 						const cast = casts
 							.map((c: any) => c.cast)
 							.find((c: any) => c.hash === tx.castHash);
-						const sender = users.find((user: any) => user.fid === Number(tx.senderFid));
+						const sender = users.find(
+							(user: any) => user.fid === Number(tx.senderFid)
+						);
 						const timeSince = getTimeSince(tx.timestamp);
 
 						return (
 							<div className="p-3 bg-zinc-300 rounded" key={i}>
 								<div className="flex items-center font-medium text-black justify-between">
-									<div className="flex items-center text-lg">
+									<div className="flex items-center">
 										<a
 											href={`https://warpcast.com/${sender?.username}`}
 											target="_black"
@@ -95,12 +97,12 @@ const Activity = () => {
 											<div className="flex items-center cursor-pointer">
 												<Image
 													src={sender?.pfp_url!}
-													width={35}
-													height={35}
+													width={30}
+													height={30}
 													alt={sender?.username!}
 													className="rounded-full"
 												/>
-												<span className="font-bold mx-2">
+												<span className="font-bold mr-1 ml-2">
 													@{sender?.username}
 												</span>
 											</div>
@@ -110,19 +112,27 @@ const Activity = () => {
 											<b>{formatEther(BigInt(tx.price))} ETH</b>
 										</span>
 									</div>
-									<span className="text-sm">{timeSince}</span>
+									<span className="text-sm">{`${timeSince} ${
+										timeSince === "just now" ? "" : " ago"
+									}`}</span>
 								</div>
 								<div
-									className={`p-4 rounded bg-slate-200 w-full mt-3`}
+									className={`p-3 rounded bg-slate-200 w-full mt-3`}
 									key={cast.hash}
 								>
 									<CastPreview castData={casts[i]} showPrice={false} />
 								</div>
 							</div>
 						);
-					})}
-				</div>
-			)}
+					})
+				) : (
+					<>
+						<div className="h-32 bg-slate-500/50 animate-pulse rounded"></div>
+						<div className="h-32 bg-slate-500/50 animate-pulse rounded"></div>
+						<div className="h-32 bg-slate-500/50 animate-pulse rounded"></div>
+					</>
+				)}
+			</div>
 		</div>
 	);
 };
