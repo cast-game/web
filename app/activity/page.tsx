@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useInView } from "react-intersection-observer";
 import {
 	getCasts,
 	getSCVQuery,
@@ -21,10 +22,18 @@ const Activity = () => {
 	const [casts, setCasts] = useState<CastData[] | null>(null);
 	const [transactions, setTransactions] = useState<any[] | null>(null);
 	const [users, setUsers] = useState<User[] | null>(null);
+	const [endCursor, setEndCursor] = useState<string | null>(null);
+	const [hasNextPage, setHasNextPage] = useState(true);
+	const { ref, inView } = useInView();
 
-	const fetchData = async () => {
+	const fetchData = async (cursor: string | null) => {
 		const response = await queryData(`{
-      transactions {
+      transactions(
+        limit: 10,
+        ${cursor ? `after: "${cursor}",` : ""}
+        orderBy: "timestamp",
+        orderDirection: "desc"
+      ) {
         items {
           castHash
           price
@@ -32,21 +41,27 @@ const Activity = () => {
           timestamp
           type
         }
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
       }
     }`);
 
-		setTransactions(
-			response.transactions.items.sort(
-				(a: any, b: any) => b.timestamp - a.timestamp
-			)
+		const newTransactions = response.transactions.items;
+		setEndCursor(response.transactions.pageInfo.endCursor);
+		setHasNextPage(response.transactions.pageInfo.hasNextPage);
+
+		setTransactions((prevTransactions) =>
+			prevTransactions
+				? [...prevTransactions, ...newTransactions]
+				: newTransactions
 		);
 
-		const castsHashes = response.transactions.items.map(
-			(tx: any) => tx.castHash
-		);
+		const castsHashes = newTransactions.map((tx: any) => tx.castHash);
 
 		const fids = Array.from(
-			new Set(response.transactions.items.map((tx: any) => tx.senderFid))
+			new Set(newTransactions.map((tx: any) => tx.senderFid))
 		) as number[];
 
 		const [usersRes, castsRes, scvQueryData] = await Promise.all([
@@ -57,75 +72,89 @@ const Activity = () => {
 
 		const castScores = handleSCVData(scvQueryData.data.FarcasterCasts.Cast);
 
-		setUsers(usersRes.users);
-		setCasts(
-			castsRes.map((cast: any, i: number) => {
-				return {
-					cast,
-					price: 0,
-					socialCapitalValue: castScores.find((c: any) => c.hash === cast.hash)
-						.score,
-				};
-			})
+		setUsers((prevUsers) =>
+			prevUsers ? [...prevUsers, ...usersRes.users] : usersRes.users
 		);
+		setCasts((prevCasts) => {
+			const newCasts = castsRes.map((cast: any, i: number) => ({
+				cast,
+				price: 0,
+				socialCapitalValue: castScores.find((c: any) => c.hash === cast.hash)
+					.score,
+			}));
+			return prevCasts ? [...prevCasts, ...newCasts] : newCasts;
+		});
 	};
 
 	useEffect(() => {
-		fetchData();
+		fetchData(null);
 	}, []);
+
+	useEffect(() => {
+		if (inView && hasNextPage) {
+			fetchData(endCursor);
+		}
+	}, [inView, hasNextPage, endCursor]);
 
 	return (
 		<div className="flex justify-center">
 			<div className="flex flex-col gap-4 w-full">
 				{transactions && casts && users ? (
-					transactions.map((tx: any, i: number) => {
-						const cast = casts
-							.map((c: any) => c.cast)
-							.find((c: any) => c.hash === tx.castHash);
-						const sender = users.find(
-							(user: any) => user.fid === Number(tx.senderFid)
-						);
-						const timeSince = getTimeSince(tx.timestamp);
+					<>
+						{transactions.map((tx: any, i: number) => {
+							const castData = casts
+								.find((c: any) => c.cast.hash === tx.castHash);
+							const sender = users.find(
+								(user: any) => user.fid === Number(tx.senderFid)
+							);
+							const timeSince = getTimeSince(tx.timestamp);
 
-						return (
-							<div className="p-3 bg-zinc-300 rounded" key={i}>
-								<div className="flex items-center font-medium text-black justify-between">
-									<div className="flex items-center">
-										<a
-											href={`https://warpcast.com/${sender?.username}`}
-											target="_black"
-										>
-											<div className="flex items-center cursor-pointer">
-												<Image
-													src={sender?.pfp_url!}
-													width={30}
-													height={30}
-													alt={sender?.username!}
-													className="rounded-full"
-												/>
-												<span className="font-bold mr-1 ml-2">
-													@{sender?.username}
-												</span>
-											</div>
-										</a>
-										<span>
-											{tx.type === "buy" ? "purchased" : "sold"} for{" "}
-											<b>{formatEther(BigInt(tx.price))} ETH</b>
-										</span>
+							return (
+								<div className="p-3 bg-zinc-300 rounded" key={i}>
+									<div className="flex items-center font-medium text-black justify-between">
+										<div className="flex items-center">
+											<a
+												href={`https://warpcast.com/${sender?.username}`}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												<div className="flex items-center cursor-pointer">
+													<Image
+														src={sender?.pfp_url!}
+														width={30}
+														height={30}
+														alt={sender?.username!}
+														className="rounded-full"
+													/>
+													<span className="font-bold mr-1 ml-2">
+														@{sender?.username}
+													</span>
+												</div>
+											</a>
+											<span>
+												{tx.type === "buy" ? "purchased" : "sold"} for{" "}
+												<b>{formatEther(BigInt(tx.price))} ETH</b>
+											</span>
+										</div>
+										<span className="text-sm">{`${timeSince} ${
+											timeSince === "just now" ? "" : "ago"
+										}`}</span>
 									</div>
-									<span className="text-sm">{`${timeSince} ${
-										timeSince === "just now" ? "" : " ago"
-									}`}</span>
+									<div
+										className={`p-3 rounded bg-slate-200 w-full mt-3`}
+										key={i}
+									>
+										<CastPreview castData={castData!} showPrice={false} />
+									</div>
 								</div>
-								<div
-									className={`p-3 rounded bg-slate-200 w-full mt-3`}
-									key={cast.hash}
-								>
-									<CastPreview castData={casts[i]} showPrice={false} />
-								</div>
+							);
+						})}
+						{hasNextPage && (
+							<div ref={ref} className="flex justify-center items-center p-4">
+								<Spinner size="3" />
 							</div>
-						);
-					})
+						)}
+					</>
 				) : (
 					<div className="flex justify-center items-center pt-16">
 						<Spinner size="3" />
