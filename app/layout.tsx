@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
-import '@radix-ui/themes/styles.css';
+import "@radix-ui/themes/styles.css";
 import { cn } from "@/lib/utils";
 import Navbar from "./components/Navbar";
 import { ProviderWrapper } from "./context/provider";
 import { PrismaClient } from "@prisma/client";
+import { Analytics } from "@vercel/analytics/react";
 
 const prisma = new PrismaClient();
 
@@ -42,6 +43,7 @@ export default async function RootLayout({
 						<div className="max-w-3xl w-full sm:p-5">{children}</div>
 					</main>
 				</ProviderWrapper>
+				<Analytics />
 			</body>
 		</html>
 	);
