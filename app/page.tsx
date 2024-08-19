@@ -1,13 +1,12 @@
 "use client";
 import Image from "next/image";
 import CastPreview from "./components/CastPreview";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-	getActiveCasts,
 	getCasts,
 	getChannel,
 	getDetails,
-	getSCVQuery,
+	getPaginatedCasts,
 	handleSCVData,
 } from "@/lib/api";
 import { useContext } from "react";
@@ -16,67 +15,90 @@ import { CastData } from "@/lib/types";
 import { fetchQuery, init } from "@airstack/airstack-react";
 import { Channel } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { Spinner } from "@radix-ui/themes";
+import { useInView } from "react-intersection-observer";
 init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const Home = () => {
 	const round = useContext(RoundContext);
 
-	const [sortBy, setSortBy] = useState("score");
+	const [sortBy, setSortBy] = useState<"score" | "price" | "latest">("latest");
 	const [details, setDetails] = useState<any>(null);
 	const [channel, setChannel] = useState<Channel | null>(null);
 	const [casts, setCasts] = useState<CastData[] | null>(null);
-	const [loading, setLoading] = useState(true);
 
-	const fetchData = async () => {
-    const [details, channel, activeCastDetails] = await Promise.all([
-      getDetails(),
-      getChannel(round?.channelId!),
-      getActiveCasts(),
-    ]);
+	const [page, setPage] = useState(1);
+	const [hasMore, setHasMore] = useState(true);
+	const { ref, inView } = useInView();
+	const initialFetchCompletedRef = useRef(false);
+	const isFetchingRef = useRef(false);
+
+	const fetchInitialData = useCallback(async () => {
+		if (initialFetchCompletedRef.current) return;
+
+		const [details, channel] = await Promise.all([
+			getDetails(),
+			getChannel(round?.channelId!),
+		]);
 
 		setDetails(details);
 		setChannel(channel);
-		setLoading(false);
+	}, [round?.channelId]);
 
-    const castsHashes = activeCastDetails.map((c: any) => c.castHash);
+	const fetchCasts = useCallback(async () => {
+		if (!hasMore || isFetchingRef.current) return;
+		isFetchingRef.current = true;
 
-    const [activeCasts, scvQueryRes] = await Promise.all([
-      getCasts(castsHashes),
-      fetchQuery(getSCVQuery(castsHashes)),
-    ]);
-
-		const castScores = handleSCVData(scvQueryRes.data.FarcasterCasts.Cast).sort(
-			(a: any, b: any) => b.score - a.score
-		);
-
-		setCasts(
-			castScores.map((c: any) => {
-				const price = activeCastDetails.find(
-					(cast: any) => cast.castHash === c.hash
-				).price;
-				const cast = activeCasts.find((cast: any) => cast.hash === c.hash);
-
-				return {
-					socialCapitalValue: c.score,
-					price,
-					cast,
-				};
-			})
-		);
-	};
+		try {
+			const { casts: newCasts, hasMore: moreAvailable } =
+				await getPaginatedCasts(sortBy, page, 10);
+			setCasts((prevCasts) =>
+				prevCasts ? [...prevCasts, ...newCasts] : newCasts
+			);
+			setHasMore(moreAvailable);
+			setPage((prevPage) => prevPage + 1);
+			console.log("fetched more data");
+		} catch (error) {
+			console.error("Error fetching casts:", error);
+		}
+		isFetchingRef.current = false;
+	}, [sortBy, page]);
 
 	useEffect(() => {
-		fetchData();
-	}, []);
+		const loadInitialData = async () => {
+			await fetchInitialData();
+			if (!casts?.length) {
+				await fetchCasts();
+			}
+		};
+		loadInitialData();
+	}, [fetchInitialData, fetchCasts]);
+
+	useEffect(() => {
+		if (inView && hasMore && !isFetchingRef.current) {
+			fetchCasts();
+		}
+	}, [inView, hasMore, fetchCasts]);
+
+	const handleSortChange = useCallback(
+		(newSortBy: "score" | "price" | "latest") => {
+			if (sortBy !== newSortBy) {
+				setSortBy(newSortBy);
+				setCasts([]);
+				setPage(1);
+				setHasMore(true);
+				fetchCasts();
+			}
+		},
+		[sortBy, fetchCasts]
+	);
 
 	interface StatBoxProps {
 		label: string;
 		value: any;
-		loading?: boolean;
 	}
 
 	const StatBox = ({ label, value }: StatBoxProps) => {
-		if (loading) {
+		if (!details) {
 			return (
 				<div className="flex h-20 bg-slate-500/50 rounded flex-1 min-w-[150px] animate-pulse"></div>
 			);
@@ -91,7 +113,7 @@ const Home = () => {
 	};
 
 	return (
-		<div className="flex flex-col px-4 sm:px-8 w-full">
+		<div className="flex flex-col w-full">
 			<div className="flex justify-between items-center mb-6 ">
 				<div className="flex items-center gap-3">
 					<div className="relative">
@@ -144,21 +166,29 @@ const Home = () => {
 			</div>
 
 			<div className="mt-6 sm:mt-10 gap-4">
-				<div className="flex flex-row items-center gap-3 text-slate-300">
+				<div className="flex flex-row items-center justify-between text-slate-300">
 					<span className="text-xl font-medium">Top Casts</span>
 					<div className="flex cursor-pointer gap-3">
 						<span
-							onClick={() => setSortBy("score")}
+							onClick={() => handleSortChange("latest")}
 							className={`${
-								sortBy === "price" ? "opacity-65" : ""
+								sortBy !== "latest" ? "opacity-65" : ""
+							} hover:text-white`}
+						>
+							latest
+						</span>
+						<span
+							onClick={() => handleSortChange("score")}
+							className={`${
+								sortBy !== "score" ? "opacity-65" : ""
 							} hover:text-white`}
 						>
 							by score
 						</span>
 						<span
-							onClick={() => setSortBy("price")}
+							onClick={() => handleSortChange("price")}
 							className={`${
-								sortBy === "score" ? "opacity-65" : ""
+								sortBy !== "price" ? "opacity-65" : ""
 							} hover:text-white`}
 						>
 							by price
@@ -175,6 +205,11 @@ const Home = () => {
 								<CastPreview castData={castData} />
 							</div>
 						))}
+						{hasMore && (
+							<div ref={ref} className="flex justify-center items-center p-4">
+								<Spinner size="3" />
+							</div>
+						)}
 					</div>
 				) : (
 					<div className="flex justify-center items-center pt-16">
