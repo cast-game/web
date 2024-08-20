@@ -68,7 +68,7 @@ const Home = () => {
 			);
 
 			setTicketsData(ticketsData);
-			await fetchCasts(ticketsData, sortBy);
+			await fetchCasts(ticketsData, sortBy, 1);
 		} catch (error) {
 			console.error("Error fetching initial data:", error);
 		} finally {
@@ -93,49 +93,51 @@ const Home = () => {
 					return tickets;
 			}
 		},
-		[ticketsData, sortBy]
+		[]
 	);
 
 	const fetchCasts = useCallback(
-		async (tickets: TicketData[], sort: string) => {
-			if (isFetchingRef.current) return;
-			isFetchingRef.current = true;
+    async (tickets: TicketData[], sort: string, currentPage: number) => {
+      if (isFetchingRef.current) return;
+      isFetchingRef.current = true;
 
-			try {
-				const sortedTickets = getSortedTickets(tickets, sort);
-				const startIndex = (page - 1) * PAGE_SIZE;
-				const endIndex = startIndex + PAGE_SIZE;
-				const paginatedTickets = sortedTickets.slice(startIndex, endIndex);
+      try {
+        const sortedTickets = getSortedTickets(tickets, sort);
+        const startIndex = (currentPage - 1) * PAGE_SIZE;
+        const endIndex = startIndex + PAGE_SIZE;
+        const paginatedTickets = sortedTickets.slice(startIndex, endIndex);
 
-				const castsHashes = paginatedTickets.map((ticket) => ticket.castHash);
-				const casts = await getCasts(castsHashes);
+        const castsHashes = paginatedTickets.map((ticket) => ticket.castHash);
+        const casts = await getCasts(castsHashes);
 
-				const newCastsData = paginatedTickets.map((ticket: TicketData) => {
-					const castDetails = casts.find(
-						(cast) => cast.hash === ticket.castHash
-					);
-					return {
-						value: ticket.value,
-						price: parseFloat(formatEther(BigInt(ticket.price))),
-						cast: castDetails,
-					};
-				});
+        const newCastsData = paginatedTickets.map((ticket: TicketData) => {
+          const castDetails = casts.find(
+            (cast) => cast.hash === ticket.castHash
+          );
+          return {
+            value: ticket.value,
+            price: parseFloat(formatEther(BigInt(ticket.price))),
+            cast: castDetails,
+          };
+        });
 
-				setCastsData((prevCasts: any) => [...prevCasts, ...newCastsData]);
-				setHasMore(endIndex < sortedTickets.length);
-				setPage(page + 1);
-			} catch (error) {
-				console.error("Error fetching casts:", error);
-			} finally {
-				isFetchingRef.current = false;
-			}
-		},
-		[ticketsData, getSortedTickets]
-	);
+        setCastsData((prevCasts: any) => 
+          currentPage === 1 ? newCastsData : [...prevCasts, ...newCastsData]
+        );
+        setHasMore(endIndex < sortedTickets.length);
+        setPage(currentPage + 1);
+      } catch (error) {
+        console.error("Error fetching casts:", error);
+      } finally {
+        isFetchingRef.current = false;
+      }
+    },
+    [getSortedTickets]
+  );
 
 	useEffect(() => {
 		if (inView && !isLoading && hasMore && ticketsData) {
-			fetchCasts(ticketsData, sortBy);
+			fetchCasts(ticketsData, sortBy, page);
 		}
 	}, [inView, isLoading, hasMore, ticketsData, page, fetchCasts]);
 
@@ -146,7 +148,7 @@ const Home = () => {
 				setCastsData([]);
 				setPage(1);
 				setHasMore(true);
-				fetchCasts(ticketsData, newSortBy);
+				fetchCasts(ticketsData, newSortBy, page);
 			}
 		},
 		[sortBy, ticketsData, fetchCasts]
@@ -256,7 +258,7 @@ const Home = () => {
 					</div>
 				</div>
 				{castsData ? (
-					<div className="flex flex-col pt-6 space-y-4">
+					<div className="flex flex-col py-6 space-y-4">
 						{castsData.map((castData: CastData) => (
 							<div
 								key={castData.cast.hash}
