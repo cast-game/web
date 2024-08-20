@@ -155,6 +155,34 @@ const Home = () => {
 		[sortBy, ticketsData, fetchCasts]
 	);
 
+	const getEndTimeAndLabel = useCallback(() => {
+		if (!round) return { endTime: null, label: "-" };
+
+		const now = new Date();
+		const tradingEnd = new Date(round.tradingEnd);
+		const gameEnd = new Date(round.gameEnd);
+
+		if (now < tradingEnd) {
+			return {
+				endTime: tradingEnd,
+				label: "trading ends",
+				indicatorColor: "bg-green-500",
+			};
+		} else if (now < gameEnd) {
+			return {
+				endTime: gameEnd,
+				label: "game ends",
+				indicatorColor: "bg-emerald-500",
+			};
+		} else {
+			return {
+				endTime: null,
+				label: "game ended",
+				indicatorColor: "bg-zinc-500",
+			};
+		}
+	}, [round]);
+
 	interface StatBoxProps {
 		label: string;
 		value: any;
@@ -175,13 +203,19 @@ const Home = () => {
 		);
 	};
 
+	const { endTime, label, indicatorColor } = getEndTimeAndLabel();
+
 	return (
 		<div className="flex flex-col w-full">
 			<div className="flex justify-between items-center mb-6 ">
 				<div className="flex items-center gap-3">
 					<div className="relative">
-						<div className="absolute -inset-0.5 bg-green-500 rounded-full animate-ping opacity-75"></div>
-						<div className="relative rounded-full h-2 w-2 bg-green-500"></div>
+						{label === "trading ends" && (
+							<div className="absolute -inset-0.5 bg-green-500 rounded-full animate-ping opacity-75"></div>
+						)}
+						<div
+							className={`relative rounded-full h-2 w-2 ${indicatorColor}`}
+						></div>
 					</div>
 					<span className="text-2xl font-medium text-slate-300">
 						{round?.title}
@@ -225,13 +259,10 @@ const Home = () => {
 				/>
 				<StatBox label="transactions" value={details?.transactionCount} />
 				<StatBox label="participants" value={details?.userCount} />
-				<StatBox label="game ends" value={
-            round?.end ? (
-              <CountdownTimer endTime={new Date(round.end)} />
-            ) : (
-              "-"
-            )
-          } />
+				<StatBox
+					label={label}
+					value={endTime ? <CountdownTimer endTime={endTime} /> : "-"}
+				/>
 			</div>
 
 			<div className="mt-6 sm:mt-10 gap-4">
