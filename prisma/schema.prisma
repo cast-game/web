@@ -12,5 +12,7 @@ model Round {
   title           String
   channelId       String
   contractAddress String
+  channelUrl      String
   end             DateTime
+  start           DateTime
 }
