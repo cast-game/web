@@ -57,7 +57,17 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
 										</div>
 									</TooltipTrigger>
 									<TooltipContent>
-										<p>Cast Value represents Lorem Ipsum.</p>
+										<p>
+											This score represents the popularity of the cast.{" "}
+											<a
+												href="https://docs.airstack.xyz/airstack-docs-and-faqs/abstractions/social-capital-value-and-social-capital-scores"
+												target="_blank"
+                        className="text-blue-400 hover:text-blue-300"
+											>
+												Read more here
+											</a>
+											.
+										</p>
 									</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>
