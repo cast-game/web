@@ -13,6 +13,7 @@ model Round {
   channelId       String
   contractAddress String
   channelUrl      String
-  end             DateTime
+  tradingEnd      DateTime
+  gameEnd         DateTime
   start           DateTime
 }
