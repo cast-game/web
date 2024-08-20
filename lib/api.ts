@@ -1,10 +1,8 @@
 import { NeynarV2APIClient } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { config } from "dotenv";
-import { apiEndpoint, gameAddress, priceTiers } from "./constants";
+import { apiEndpoint } from "./constants";
 import { client } from "./viem";
 import { formatEther } from "viem";
-import { CastData } from "./types";
-import { fetchQuery } from "@airstack/airstack-react";
 config();
 
 const neynar = new NeynarV2APIClient(process.env.NEXT_PUBLIC_NEYNAR_API_KEY!);
@@ -55,10 +53,10 @@ interface Details {
 	userCount: number;
 }
 
-export const getDetails = async (): Promise<Details> => {
+export const getDetails = async (address: `0x${string}`): Promise<Details> => {
 	const [rewardPool, txsRes, statsRes] = await Promise.all([
 		client.getBalance({
-			address: gameAddress,
+			address,
 		}),
 		queryData(`{
 			transactions {
@@ -114,4 +112,4 @@ export const getActiveTickets = async () => {
 		price: ticket.buyPrice,
 		createdTime: ticket.castCreated,
 	}));
-}
+};
