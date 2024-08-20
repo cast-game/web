@@ -79,8 +79,7 @@ const Activity = () => {
 			const newCasts = castsRes.map((cast: any, i: number) => ({
 				cast,
 				price: 0,
-				socialCapitalValue: castScores.find((c: any) => c.hash === cast.hash)
-					.score,
+				value: castScores.find((c: any) => c.hash === cast.hash).score,
 			}));
 			return prevCasts ? [...prevCasts, ...newCasts] : newCasts;
 		});
@@ -102,8 +101,9 @@ const Activity = () => {
 				{transactions && casts && users ? (
 					<>
 						{transactions.map((tx: any, i: number) => {
-							const castData = casts
-								.find((c: any) => c.cast.hash === tx.castHash);
+							const castData = casts.find(
+								(c: any) => c.cast.hash === tx.castHash
+							);
 							const sender = users.find(
 								(user: any) => user.fid === Number(tx.senderFid)
 							);
@@ -111,7 +111,7 @@ const Activity = () => {
 
 							return (
 								<div className="p-3 bg-zinc-300 rounded" key={i}>
-									<div className="flex items-center font-medium text-black justify-between">
+									<div className="flex items-center font-medium text-black justify-between mb-3">
 										<div className="flex items-center">
 											<a
 												href={`https://warpcast.com/${sender?.username}`}
@@ -140,12 +140,7 @@ const Activity = () => {
 											timeSince === "just now" ? "" : "ago"
 										}`}</span>
 									</div>
-									<div
-										className={`p-3 rounded bg-slate-200 w-full mt-3`}
-										key={i}
-									>
-										<CastPreview castData={castData!} showPrice={false} />
-									</div>
+									<CastPreview castData={castData!} showPrice={false} />
 								</div>
 							);
 						})}

@@ -119,7 +119,7 @@ const Tickets = () => {
 			const balance = balances.find((b) => b.castHash === c.hash)?.balance;
 			const cast = castsRes.find((cast) => cast.hash === c.hash);
 			return {
-				socialCapitalValue: c.score,
+				value: c.score,
 				balance,
 				cast,
 				price: formatEther(ticket.buyPrice),
@@ -172,7 +172,7 @@ const Tickets = () => {
 				<div className="flex flex-col gap-4">
 					{data.map((castData: CastData, i: number) => (
 						<div className="p-3 bg-zinc-300 rounded" key={i}>
-							<div className="flex items-center text-black justify-between">
+							<div className="flex items-center text-black justify-between mb-3">
 								<div className="flex items-center text-lg font-bold">
 									<div className="flex gap-3 items-center">
 										<div className="flex text-xl items-center gap-1 text-black font-bold py-1 px-3 bg-black/20 rounded justify-center">
@@ -191,12 +191,8 @@ const Tickets = () => {
 									<span className="text-lg font-bold">{`${castData.balance}x`}</span>
 								)}
 							</div>
-							<div
-								className={`p-4 rounded bg-slate-200 w-full mt-3`}
-								key={castData.cast.hash}
-							>
-								<CastPreview castData={castData} showPrice={false} />
-							</div>
+
+							<CastPreview castData={castData} showPrice={false} />
 						</div>
 					))}
 					{hasNextPage && (
