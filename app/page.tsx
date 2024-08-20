@@ -3,93 +3,153 @@ import Image from "next/image";
 import CastPreview from "./components/CastPreview";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+	getActiveTickets,
 	getCasts,
 	getChannel,
 	getDetails,
-	getPaginatedCasts,
+	getSCVQuery,
 	handleSCVData,
 } from "@/lib/api";
 import { useContext } from "react";
 import { RoundContext } from "./context/provider";
-import { CastData } from "@/lib/types";
+import { CastData, TicketData } from "@/lib/types";
 import { fetchQuery, init } from "@airstack/airstack-react";
 import { Channel } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { Spinner } from "@radix-ui/themes";
 import { useInView } from "react-intersection-observer";
+import { formatEther } from "viem";
 init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
+
+const PAGE_SIZE = 10;
 
 const Home = () => {
 	const round = useContext(RoundContext);
 
-	const [sortBy, setSortBy] = useState<"score" | "price" | "latest">("latest");
 	const [details, setDetails] = useState<any>(null);
 	const [channel, setChannel] = useState<Channel | null>(null);
-	const [casts, setCasts] = useState<CastData[] | null>(null);
 
-	const [page, setPage] = useState(1);
+	const [castsData, setCastsData] = useState<CastData[] | null>([]);
+	const [ticketsData, setTicketsData] = useState<TicketData[] | null>([]);
+
 	const [hasMore, setHasMore] = useState(true);
+	const [sortBy, setSortBy] = useState<"score" | "price" | "latest">("latest");
+	const [page, setPage] = useState(1);
+	const [isLoading, setIsLoading] = useState(true);
+
 	const { ref, inView } = useInView();
-	const initialFetchCompletedRef = useRef(false);
 	const isFetchingRef = useRef(false);
 
 	const fetchInitialData = useCallback(async () => {
-		if (initialFetchCompletedRef.current) return;
+		try {
+			setIsLoading(true);
+			const [details, channel, tickets] = await Promise.all([
+				getDetails(),
+				getChannel(round?.channelId!),
+				getActiveTickets(),
+			]);
 
-		const [details, channel] = await Promise.all([
-			getDetails(),
-			getChannel(round?.channelId!),
-		]);
+			setDetails(details);
+			setChannel(channel);
 
-		setDetails(details);
-		setChannel(channel);
+			const castsHashes = tickets.map((ticket: any) => ticket.castHash);
+			const res = await fetchQuery(getSCVQuery(castsHashes));
+			const scoresData = handleSCVData(res.data.FarcasterCasts.Cast);
+
+			const ticketsData: TicketData[] = tickets.map(
+				({ castHash, price, createdTime }: any) => {
+					const data = scoresData.find((data: any) => data.hash === castHash);
+					return {
+						castHash,
+						price,
+						value: Number(data.score),
+						createdTime: Math.floor(new Date(createdTime).getTime() / 1000),
+					};
+				}
+			);
+
+			setTicketsData(ticketsData);
+			await fetchCasts(ticketsData, sortBy);
+		} catch (error) {
+			console.error("Error fetching initial data:", error);
+		} finally {
+			setIsLoading(false);
+		}
 	}, [round?.channelId]);
 
-	const fetchCasts = useCallback(async () => {
-		if (!hasMore || isFetchingRef.current) return;
-		isFetchingRef.current = true;
-
-		try {
-			const { casts: newCasts, hasMore: moreAvailable } =
-				await getPaginatedCasts(sortBy, page, 10);
-			setCasts((prevCasts) =>
-				prevCasts ? [...prevCasts, ...newCasts] : newCasts
-			);
-			setHasMore(moreAvailable);
-			setPage((prevPage) => prevPage + 1);
-			console.log("fetched more data");
-		} catch (error) {
-			console.error("Error fetching casts:", error);
-		}
-		isFetchingRef.current = false;
-	}, [sortBy, page]);
-
 	useEffect(() => {
-		const loadInitialData = async () => {
-			await fetchInitialData();
-			if (!casts?.length) {
-				await fetchCasts();
+		fetchInitialData();
+	}, []);
+
+	const getSortedTickets = useCallback(
+		(tickets: TicketData[], sort: string) => {
+			switch (sort) {
+				case "latest":
+					return [...tickets].sort((a, b) => b.createdTime - a.createdTime);
+				case "score":
+					return [...tickets].sort((a, b) => b.value - a.value);
+				case "price":
+					return [...tickets].sort((a, b) => b.price - a.price);
+				default:
+					return tickets;
 			}
-		};
-		loadInitialData();
-	}, [fetchInitialData, fetchCasts]);
+		},
+		[ticketsData, sortBy]
+	);
+
+	const fetchCasts = useCallback(
+		async (tickets: TicketData[], sort: string) => {
+			if (isFetchingRef.current) return;
+			isFetchingRef.current = true;
+
+			try {
+				const sortedTickets = getSortedTickets(tickets, sort);
+				const startIndex = (page - 1) * PAGE_SIZE;
+				const endIndex = startIndex + PAGE_SIZE;
+				const paginatedTickets = sortedTickets.slice(startIndex, endIndex);
+
+				const castsHashes = paginatedTickets.map((ticket) => ticket.castHash);
+				const casts = await getCasts(castsHashes);
+
+				const newCastsData = paginatedTickets.map((ticket: TicketData) => {
+					const castDetails = casts.find(
+						(cast) => cast.hash === ticket.castHash
+					);
+					return {
+						value: ticket.value,
+						price: parseFloat(formatEther(BigInt(ticket.price))),
+						cast: castDetails,
+					};
+				});
+
+				setCastsData((prevCasts: any) => [...prevCasts, ...newCastsData]);
+				setHasMore(endIndex < sortedTickets.length);
+				setPage(page + 1);
+			} catch (error) {
+				console.error("Error fetching casts:", error);
+			} finally {
+				isFetchingRef.current = false;
+			}
+		},
+		[ticketsData, getSortedTickets]
+	);
 
 	useEffect(() => {
-		if (inView && hasMore && !isFetchingRef.current) {
-			fetchCasts();
+		if (inView && !isLoading && hasMore && ticketsData) {
+			fetchCasts(ticketsData, sortBy);
 		}
-	}, [inView, hasMore, fetchCasts]);
+	}, [inView, isLoading, hasMore, ticketsData, page, fetchCasts]);
 
 	const handleSortChange = useCallback(
 		(newSortBy: "score" | "price" | "latest") => {
-			if (sortBy !== newSortBy) {
+			if (ticketsData && sortBy !== newSortBy) {
 				setSortBy(newSortBy);
-				setCasts([]);
+				setCastsData([]);
 				setPage(1);
 				setHasMore(true);
-				fetchCasts();
+				fetchCasts(ticketsData, newSortBy);
 			}
 		},
-		[sortBy, fetchCasts]
+		[sortBy, ticketsData, fetchCasts]
 	);
 
 	interface StatBoxProps {
@@ -195,9 +255,9 @@ const Home = () => {
 						</span>
 					</div>
 				</div>
-				{casts ? (
+				{castsData ? (
 					<div className="flex flex-col pt-6 space-y-4">
-						{casts.map((castData: CastData, i: number) => (
+						{castsData.map((castData: CastData) => (
 							<div
 								key={castData.cast.hash}
 								className="p-3 rounded hover:bg-slate-100 bg-slate-200 hover:outline outline-4 outline-purple-700"

@@ -18,7 +18,7 @@ interface Props {
 
 const CastPreview = ({ castData, showPrice = true }: Props) => {
   if (!castData) return null;
-  const { cast, socialCapitalValue, price } = castData;
+  const { cast, value, price } = castData;
 
   const timeSince = getTimeSince(
     Math.floor(new Date(cast.timestamp).getTime()).toString()
@@ -52,11 +52,11 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="text-xs flex items-center justify-center px-2 py-1 bg-gradient-to-r from-[#45A3B8] to-[#23B68A] text-white font-semibold rounded">
-                    {socialCapitalValue}
+                    {value}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Social Capital Value represents Lorem Ipsum.</p>
+                  <p>Cast Value represents Lorem Ipsum.</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
