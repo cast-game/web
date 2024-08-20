@@ -18,6 +18,7 @@ import { Channel } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { Spinner } from "@radix-ui/themes";
 import { useInView } from "react-intersection-observer";
 import { formatEther } from "viem";
+import CountdownTimer from "./components/CountdownTimer";
 init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const PAGE_SIZE = 10;
@@ -43,7 +44,7 @@ const Home = () => {
 		try {
 			setIsLoading(true);
 			const [details, channel, tickets] = await Promise.all([
-				getDetails(),
+				getDetails(round?.contractAddress as `0x${string}`),
 				getChannel(round?.channelId!),
 				getActiveTickets(),
 			]);
@@ -224,7 +225,13 @@ const Home = () => {
 				/>
 				<StatBox label="transactions" value={details?.transactionCount} />
 				<StatBox label="participants" value={details?.userCount} />
-				<StatBox label="game ends" value="23:59:59" />
+				<StatBox label="game ends" value={
+            round?.end ? (
+              <CountdownTimer endTime={new Date(round.end)} />
+            ) : (
+              "-"
+            )
+          } />
 			</div>
 
 			<div className="mt-6 sm:mt-10 gap-4">
