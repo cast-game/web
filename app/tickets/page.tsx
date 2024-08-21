@@ -182,7 +182,9 @@ const Tickets = () => {
 												height={20}
 												alt="Ethereum logo"
 											/>
-											<span>{castData.price}</span>
+											<span>
+												{Number(Number(castData.price).toFixed(5)).toString()}
+											</span>
 										</div>
 										{/* <span className="text-lime-600">+100%</span> */}
 									</div>

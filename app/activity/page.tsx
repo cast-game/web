@@ -133,7 +133,12 @@ const Activity = () => {
 											</a>
 											<span>
 												{tx.type === "buy" ? "purchased" : "sold"} for{" "}
-												<b>{formatEther(BigInt(tx.price))} ETH</b>
+												<b>
+													{Number(
+														Number(formatEther(BigInt(tx.price))).toFixed(5)
+													).toString()}{" "}
+													ETH
+												</b>
 											</span>
 										</div>
 										<span className="text-sm">{`${timeSince} ${

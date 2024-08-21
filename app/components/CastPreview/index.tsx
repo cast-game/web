@@ -25,7 +25,12 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
 	);
 
 	const embeds = cast.embeds.map((embed: any) => {
-		if (embed.metadata) return embed.metadata.content_type.split("/")[0];
+		if (embed.metadata) {
+			if (embed.metadata.content_type.split(";")[0] === "text/html") {
+				return "frame";
+			}
+			return embed.metadata.content_type.split("/")[0];
+		}
 		return "quote";
 	});
 
@@ -62,7 +67,7 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
 											<a
 												href="https://docs.airstack.xyz/airstack-docs-and-faqs/abstractions/social-capital-value-and-social-capital-scores"
 												target="_blank"
-                        className="text-blue-400 hover:text-blue-300"
+												className="text-blue-400 hover:text-blue-300"
 											>
 												Read more here
 											</a>
@@ -94,7 +99,9 @@ const CastPreview = ({ castData, showPrice = true }: Props) => {
 										height={17}
 										alt="Ethereum logo"
 									/>
-									<span className="text-clip">{price}</span>
+									<span className="text-clip">
+										{Number(price?.toFixed(5)).toString()}
+									</span>
 								</div>
 							)}
 						</div>
