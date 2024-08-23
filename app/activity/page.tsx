@@ -2,21 +2,15 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import {
-	getCasts,
-	getSCVQuery,
-	getUsers,
-	handleSCVData,
-	queryData,
-} from "@/lib/api";
+import { getCastData, getCasts, getUsers, queryData } from "@/lib/api";
 import CastPreview from "../components/CastPreview";
 import { formatEther } from "viem";
 import { getTimeSince } from "@/lib/helpers";
 import { CastData } from "@/lib/types";
-import { fetchQuery, init } from "@airstack/airstack-react";
 import { User } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { Spinner } from "@radix-ui/themes";
-init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
+
+const PAGE_SIZE = 25;
 
 const Activity = () => {
 	const [casts, setCasts] = useState<CastData[] | null>(null);
@@ -25,12 +19,12 @@ const Activity = () => {
 	const [endCursor, setEndCursor] = useState<string | null>(null);
 	const [hasNextPage, setHasNextPage] = useState(true);
 	const { ref, inView } = useInView();
-  const initialFetchDone = useRef(false);
+	const initialFetchDone = useRef(false);
 
 	const fetchData = useCallback(async (cursor: string | null) => {
 		const response = await queryData(`{
 					transactions(
-						limit: 25,
+						limit: ${PAGE_SIZE},
 						${cursor ? `after: "${cursor}",` : ""}
 						orderBy: "timestamp",
 						orderDirection: "desc"
@@ -62,16 +56,14 @@ const Activity = () => {
 		const castsHashes = newTransactions.map((tx: any) => tx.castHash);
 
 		const fids = Array.from(
-			new Set(newTransactions.map((tx: any) => tx.senderFid))
+			new Set(newTransactions.map((tx: any) => Number(tx.senderFid)))
 		) as number[];
 
-		const [usersRes, castsRes, scvQueryData] = await Promise.all([
+		const [usersRes, castsRes, castScores] = await Promise.all([
 			getUsers(fids),
 			getCasts(castsHashes),
-			fetchQuery(getSCVQuery(castsHashes)),
+			getCastData(castsHashes),
 		]);
-
-		const castScores = handleSCVData(scvQueryData.data.FarcasterCasts.Cast);
 
 		setUsers((prevUsers) =>
 			prevUsers ? [...prevUsers, ...usersRes.users] : usersRes.users
@@ -89,9 +81,9 @@ const Activity = () => {
 
 	useEffect(() => {
 		if (!initialFetchDone.current) {
-      fetchData(null);
-      initialFetchDone.current = true;
-    }
+			fetchData(null);
+			initialFetchDone.current = true;
+		}
 	}, [fetchData]);
 
 	useEffect(() => {

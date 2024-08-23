@@ -1,1 +1,0 @@
-export const apiEndpoint = "https://api-production-c6c20.up.railway.app/";

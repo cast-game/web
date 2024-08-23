@@ -4,23 +4,19 @@ import CastPreview from "./components/CastPreview";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	getActiveTickets,
+	getCastData,
 	getCasts,
 	getChannel,
 	getDetails,
-	getSCVQuery,
-	handleSCVData,
 } from "@/lib/api";
 import { useContext } from "react";
 import { RoundContext } from "./context/provider";
 import { CastData, TicketData } from "@/lib/types";
-import { fetchQuery, init } from "@airstack/airstack-react";
 import { Channel } from "@neynar/nodejs-sdk/build/neynar-api/v2";
 import { Spinner } from "@radix-ui/themes";
 import { useInView } from "react-intersection-observer";
 import { formatEther } from "viem";
 import CountdownTimer from "./components/CountdownTimer";
-init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
-
 const PAGE_SIZE = 10;
 
 const Home = () => {
@@ -72,7 +68,7 @@ const Home = () => {
 
 				const newCastsData = paginatedTickets.map((ticket: TicketData) => {
 					const castDetails = casts.find(
-						(cast) => cast.hash === ticket.castHash
+						(cast: any) => cast.hash === ticket.castHash
 					);
 					return {
 						value: ticket.value,
@@ -108,8 +104,7 @@ const Home = () => {
 			setChannel(channel);
 
 			const castsHashes = tickets.map((ticket: any) => ticket.castHash);
-			const res = await fetchQuery(getSCVQuery(castsHashes));
-			const scoresData = handleSCVData(res.data.FarcasterCasts.Cast);
+			const scoresData = await getCastData(castsHashes);
 
 			const ticketsData: TicketData[] = tickets.map(
 				({ castHash, price, createdTime }: any) => {

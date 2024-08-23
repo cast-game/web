@@ -1,37 +1,46 @@
-import { NeynarV2APIClient } from "@neynar/nodejs-sdk/build/neynar-api/v2";
-import { config } from "dotenv";
-import { apiEndpoint } from "./constants";
 import { client } from "./viem";
 import { formatEther } from "viem";
-config();
 
-const neynar = new NeynarV2APIClient(process.env.NEXT_PUBLIC_NEYNAR_API_KEY!);
+const apiEndpoint = "https://api-production-c6c20.up.railway.app/";
 
 export const getCasts = async (castsHashes: string[]) => {
-	const res = await neynar.fetchBulkCasts(castsHashes);
-	return res.result.casts;
+	const res = await fetch("/api/getCasts", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ castsHashes }),
+	});
+	if (!res.ok) throw new Error("Failed to fetch casts");
+	return await res.json();
 };
 
-export const getUsers = async (fids: number[]) =>
-	await neynar.fetchBulkUsers(fids);
+export const getUsers = async (fids: number[]) => {
+	const res = await fetch("/api/getUsers", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ fids }),
+	});
+	if (!res.ok) throw new Error("Failed to fetch users");
+	return await res.json();
+};
 
 export const getChannel = async (channelId: string) => {
-	const res = await neynar.fetchBulkChannels([channelId]);
-	return res.channels[0];
+	const res = await fetch("/api/getChannel", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ channelId }),
+	});
+	if (!res.ok) throw new Error("Failed to fetch channel");
+	return await res.json();
 };
 
-export const handleSCVData = (data: any) =>
-	data.map((cast: any) => {
-		const score =
-			cast.castValue.formattedValue > 10
-				? Math.ceil(cast.castValue.formattedValue)
-				: cast.castValue.formattedValue.toFixed(2);
-
-		return {
-			hash: cast.hash,
-			score,
-		};
+export const getCastData = async (castsHashes: string[]) => {
+	const res = await fetch("/api/getCastData", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ castsHashes }),
 	});
+	return await res.json();
+};
 
 export const queryData = async (query: string) => {
 	const res = await fetch(apiEndpoint, {
@@ -78,23 +87,6 @@ export const getDetails = async (address: `0x${string}`): Promise<Details> => {
 		userCount: statsRes.gameStats.users.length,
 	};
 };
-
-export function getSCVQuery(castsHashes: string[]) {
-	return `{
-    FarcasterCasts(
-      input: {filter: {hash: {_in: ${JSON.stringify(
-				castsHashes
-			)}}}, blockchain: ALL}
-    ) {
-      Cast {
-        hash
-        castValue {
-          formattedValue
-        }
-      }
-    }
-  }`;
-}
 
 export const getActiveTickets = async () => {
 	const res = await queryData(`{

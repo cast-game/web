@@ -4,31 +4,23 @@ import CastPreview from "../components/CastPreview";
 import { usePrivy } from "@privy-io/react-auth";
 import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import {
-	getCasts,
-	getSCVQuery,
-	getUsers,
-	handleSCVData,
-	queryData,
-} from "@/lib/api";
-import { fetchQuery, init } from "@airstack/airstack-react";
+import { getCastData, getCasts, getUsers, queryData } from "@/lib/api";
 import { CastData } from "@/lib/types";
 import { formatEther } from "viem";
 import { Spinner } from "@radix-ui/themes";
-init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY!);
 
 const ITEMS_PER_PAGE = 10;
 
 const Tickets = () => {
 	const { user } = usePrivy();
-	const [data, setData] = useState<CastData[] | null>(null);
+	const [data, setData] = useState<CastData[]>([]);
 	const [endCursor, setEndCursor] = useState<string | null>(null);
 	const [hasNextPage, setHasNextPage] = useState(true);
 	const { ref, inView } = useInView();
 	const [addresses, setAddresses] = useState<string[]>([]);
 
-	const fetchUserData = useCallback(async () => {
-		const res = await getUsers([user!.farcaster?.fid!]);
+	const fetchUserAddresses = useCallback(async () => {
+		const res = await getUsers([user?.farcaster?.fid!]);
 		const userData = res.users[0];
 		const userAddresses = [
 			userData.custody_address,
@@ -99,8 +91,8 @@ const Tickets = () => {
 
 	const fetchCastData = async (balances: any[]) => {
 		const castsHashes = balances.map((b) => b.castHash);
-		const [scvRes, castsRes, ticketsRes] = await Promise.all([
-			fetchQuery(getSCVQuery(castsHashes)),
+		const [castScores, castsRes, ticketsRes] = await Promise.all([
+			getCastData(castsHashes),
 			getCasts(castsHashes),
 			queryData(`{
         tickets(where: { id_in: ${JSON.stringify(castsHashes)} }) {
@@ -112,12 +104,10 @@ const Tickets = () => {
       }`),
 		]);
 
-		const castScores = handleSCVData(scvRes.data.FarcasterCasts.Cast);
-
 		const castData: CastData[] = castScores.map((c: any, i: number) => {
 			const ticket = ticketsRes.tickets.items.find((t: any) => t.id === c.hash);
 			const balance = balances.find((b) => b.castHash === c.hash)?.balance;
-			const cast = castsRes.find((cast) => cast.hash === c.hash);
+			const cast = castsRes.find((cast: any) => cast.hash === c.hash);
 			return {
 				value: c.score,
 				balance,
@@ -129,35 +119,38 @@ const Tickets = () => {
 		return castData;
 	};
 
-	const fetchData = useCallback(async (cursor: string | null) => {
-		if (!addresses.length) {
-			const userAddresses = await fetchUserData();
-			const {
-				balances,
-				endCursor: newEndCursor,
-				hasNextPage: newHasNextPage,
-			} = await fetchTickets(userAddresses, cursor);
-			const castData = await fetchCastData(balances);
+	const fetchData = useCallback(
+		async (cursor: string | null) => {
+			if (!addresses.length) {
+				const userAddresses = await fetchUserAddresses();
+				const {
+					balances,
+					endCursor: newEndCursor,
+					hasNextPage: newHasNextPage,
+				} = await fetchTickets(userAddresses, cursor);
+				const castData = await fetchCastData(balances);
 
-			setData(castData);
-			setEndCursor(newEndCursor);
-			setHasNextPage(newHasNextPage);
-		} else {
-			const {
-				balances,
-				endCursor: newEndCursor,
-				hasNextPage: newHasNextPage,
-			} = await fetchTickets(addresses, cursor);
-			const castData = await fetchCastData(balances);
+				setData(castData);
+				setEndCursor(newEndCursor);
+				setHasNextPage(newHasNextPage);
+			} else {
+				const {
+					balances,
+					endCursor: newEndCursor,
+					hasNextPage: newHasNextPage,
+				} = await fetchTickets(addresses, cursor);
+				const castData = await fetchCastData(balances);
 
-			setData((prevData) => (prevData ? [...prevData, ...castData] : castData));
-			setEndCursor(newEndCursor);
-			setHasNextPage(newHasNextPage);
-		}
-	}, [addresses, fetchUserData]);
+				setData([...data, ...castData]);
+				setEndCursor(newEndCursor);
+				setHasNextPage(newHasNextPage);
+			}
+		},
+		[addresses, fetchUserAddresses]
+	);
 
 	useEffect(() => {
-		if (user) fetchData(null);
+		if (user?.farcaster) fetchData(null);
 	}, [user, fetchData]);
 
 	useEffect(() => {
