@@ -73,7 +73,7 @@ export const getDetails = async (address: `0x${string}`): Promise<Details> => {
 	]);
 
 	return {
-		rewardPool: Number(formatEther(rewardPool)).toFixed(3),
+		rewardPool: Number(Number(formatEther(rewardPool)).toFixed(3)).toString(),
 		transactionCount: txsRes.transactions.items.length,
 		userCount: statsRes.gameStats.users.length,
 	};
