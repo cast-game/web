@@ -40,47 +40,6 @@ const Home = () => {
 	const { ref, inView } = useInView();
 	const isFetchingRef = useRef(false);
 
-	const fetchInitialData = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			const [details, channel, tickets] = await Promise.all([
-				getDetails(round?.contractAddress as `0x${string}`),
-				getChannel(round?.channelId!),
-				getActiveTickets(),
-			]);
-
-			setDetails(details);
-			setChannel(channel);
-
-			const castsHashes = tickets.map((ticket: any) => ticket.castHash);
-			const res = await fetchQuery(getSCVQuery(castsHashes));
-			const scoresData = handleSCVData(res.data.FarcasterCasts.Cast);
-
-			const ticketsData: TicketData[] = tickets.map(
-				({ castHash, price, createdTime }: any) => {
-					const data = scoresData.find((data: any) => data.hash === castHash);
-					return {
-						castHash,
-						price,
-						value: Number(data.score),
-						createdTime: Math.floor(new Date(createdTime).getTime() / 1000),
-					};
-				}
-			);
-
-			setTicketsData(ticketsData);
-			await fetchCasts(ticketsData, sortBy, 1);
-		} catch (error) {
-			console.error("Error fetching initial data:", error);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [round?.channelId]);
-
-	useEffect(() => {
-		fetchInitialData();
-	}, []);
-
 	const getSortedTickets = useCallback(
 		(tickets: TicketData[], sort: string) => {
 			switch (sort) {
@@ -136,11 +95,52 @@ const Home = () => {
 		[getSortedTickets]
 	);
 
+	const fetchInitialData = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			const [details, channel, tickets] = await Promise.all([
+				getDetails(round?.contractAddress as `0x${string}`),
+				getChannel(round?.channelId!),
+				getActiveTickets(),
+			]);
+
+			setDetails(details);
+			setChannel(channel);
+
+			const castsHashes = tickets.map((ticket: any) => ticket.castHash);
+			const res = await fetchQuery(getSCVQuery(castsHashes));
+			const scoresData = handleSCVData(res.data.FarcasterCasts.Cast);
+
+			const ticketsData: TicketData[] = tickets.map(
+				({ castHash, price, createdTime }: any) => {
+					const data = scoresData.find((data: any) => data.hash === castHash);
+					return {
+						castHash,
+						price,
+						value: Number(data.score),
+						createdTime: Math.floor(new Date(createdTime).getTime() / 1000),
+					};
+				}
+			);
+
+			setTicketsData(ticketsData);
+			await fetchCasts(ticketsData, sortBy, 1);
+		} catch (error) {
+			console.error("Error fetching initial data:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [round?.channelId, fetchCasts, round?.contractAddress, sortBy]);
+
+	useEffect(() => {
+		fetchInitialData();
+	}, [fetchInitialData]);
+
 	useEffect(() => {
 		if (inView && !isLoading && hasMore && ticketsData) {
 			fetchCasts(ticketsData, sortBy, page);
 		}
-	}, [inView, isLoading, hasMore, ticketsData, page, fetchCasts]);
+	}, [inView, isLoading, hasMore, ticketsData, page, fetchCasts, sortBy]);
 
 	const handleSortChange = useCallback(
 		(newSortBy: "score" | "price" | "latest") => {
@@ -152,7 +152,7 @@ const Home = () => {
 				fetchCasts(ticketsData, newSortBy, page);
 			}
 		},
-		[sortBy, ticketsData, fetchCasts]
+		[sortBy, ticketsData, fetchCasts, page]
 	);
 
 	const getEndTimeAndLabel = useCallback(() => {

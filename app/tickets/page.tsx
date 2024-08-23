@@ -2,7 +2,7 @@
 import Image from "next/image";
 import CastPreview from "../components/CastPreview";
 import { usePrivy } from "@privy-io/react-auth";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import {
 	getCasts,
@@ -27,7 +27,7 @@ const Tickets = () => {
 	const { ref, inView } = useInView();
 	const [addresses, setAddresses] = useState<string[]>([]);
 
-	const fetchUserData = async () => {
+	const fetchUserData = useCallback(async () => {
 		const res = await getUsers([user!.farcaster?.fid!]);
 		const userData = res.users[0];
 		const userAddresses = [
@@ -36,7 +36,7 @@ const Tickets = () => {
 		];
 		setAddresses(userAddresses);
 		return userAddresses;
-	};
+	}, [user]);
 
 	const fetchTickets = async (
 		userAddresses: string[],
@@ -129,7 +129,7 @@ const Tickets = () => {
 		return castData;
 	};
 
-	const fetchData = async (cursor: string | null) => {
+	const fetchData = useCallback(async (cursor: string | null) => {
 		if (!addresses.length) {
 			const userAddresses = await fetchUserData();
 			const {
@@ -154,17 +154,17 @@ const Tickets = () => {
 			setEndCursor(newEndCursor);
 			setHasNextPage(newHasNextPage);
 		}
-	};
+	}, [addresses, fetchUserData]);
 
 	useEffect(() => {
 		if (user) fetchData(null);
-	}, [user]);
+	}, [user, fetchData]);
 
 	useEffect(() => {
 		if (inView && hasNextPage) {
 			fetchData(endCursor);
 		}
-	}, [inView, hasNextPage]);
+	}, [inView, hasNextPage, endCursor, fetchData]);
 
 	return (
 		<div className="flex justify-center">
