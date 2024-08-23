@@ -16,7 +16,7 @@ export const ProviderWrapper = ({ children, value }: Props) => {
 
 	return (
 		<RoundContext.Provider value={round}>
-			<PrivyProvider appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}>
+			<PrivyProvider appId={"clztmdwbq0c1h7bcas8l3doz6"}>
 				<Theme
 					hasBackground={false}
 					appearance="dark"
