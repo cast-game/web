@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import {
 	getCasts,
@@ -25,28 +25,29 @@ const Activity = () => {
 	const [endCursor, setEndCursor] = useState<string | null>(null);
 	const [hasNextPage, setHasNextPage] = useState(true);
 	const { ref, inView } = useInView();
+  const initialFetchDone = useRef(false);
 
-	const fetchData = async (cursor: string | null) => {
+	const fetchData = useCallback(async (cursor: string | null) => {
 		const response = await queryData(`{
-      transactions(
-        limit: 10,
-        ${cursor ? `after: "${cursor}",` : ""}
-        orderBy: "timestamp",
-        orderDirection: "desc"
-      ) {
-        items {
-          castHash
-          price
-          senderFid
-          timestamp
-          type
-        }
-        pageInfo {
-          endCursor
-          hasNextPage
-        }
-      }
-    }`);
+					transactions(
+						limit: 25,
+						${cursor ? `after: "${cursor}",` : ""}
+						orderBy: "timestamp",
+						orderDirection: "desc"
+					) {
+						items {
+							castHash
+							price
+							senderFid
+							timestamp
+							type
+						}
+						pageInfo {
+							endCursor
+							hasNextPage
+						}
+					}
+				}`);
 
 		const newTransactions = response.transactions.items;
 		setEndCursor(response.transactions.pageInfo.endCursor);
@@ -75,6 +76,7 @@ const Activity = () => {
 		setUsers((prevUsers) =>
 			prevUsers ? [...prevUsers, ...usersRes.users] : usersRes.users
 		);
+
 		setCasts((prevCasts) => {
 			const newCasts = castsRes.map((cast: any, i: number) => ({
 				cast,
@@ -83,17 +85,20 @@ const Activity = () => {
 			}));
 			return prevCasts ? [...prevCasts, ...newCasts] : newCasts;
 		});
-	};
+	}, []);
 
 	useEffect(() => {
-		fetchData(null);
-	}, []);
+		if (!initialFetchDone.current) {
+      fetchData(null);
+      initialFetchDone.current = true;
+    }
+	}, [fetchData]);
 
 	useEffect(() => {
 		if (inView && hasNextPage) {
 			fetchData(endCursor);
 		}
-	}, [inView, hasNextPage, endCursor]);
+	}, [inView, hasNextPage, endCursor, fetchData]);
 
 	return (
 		<div className="flex justify-center">
