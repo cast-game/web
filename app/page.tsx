@@ -25,8 +25,8 @@ const Home = () => {
 	const [details, setDetails] = useState<any>(null);
 	const [channel, setChannel] = useState<Channel | null>(null);
 
-	const [castsData, setCastsData] = useState<CastData[] | null>([]);
-	const [ticketsData, setTicketsData] = useState<TicketData[] | null>([]);
+	const [castsData, setCastsData] = useState<CastData[] | null>(null);
+	const [ticketsData, setTicketsData] = useState<TicketData[] | null>(null);
 
 	const [hasMore, setHasMore] = useState(true);
 	const [sortBy, setSortBy] = useState<"score" | "price" | "latest">("latest");
@@ -102,6 +102,13 @@ const Home = () => {
 
 			setDetails(details);
 			setChannel(channel);
+
+			if (tickets.length === 0) {
+				setIsLoading(false);
+				setHasMore(false);
+				setCastsData([]);
+				return;
+			}
 
 			const castsHashes = tickets.map((ticket: any) => ticket.castHash);
 			const scoresData = await getCastData(castsHashes);
@@ -291,16 +298,27 @@ const Home = () => {
 					</div>
 				</div>
 				{castsData ? (
-					<div className="flex flex-col py-6 space-y-4">
-						{castsData.map((castData: CastData) => (
-							<CastPreview castData={castData} key={castData.cast.hash} />
-						))}
-						{hasMore && (
-							<div ref={ref} className="flex justify-center items-center p-4">
-								<Spinner size="3" />
+					<>
+						{castsData.length > 0 ? (
+							<div className="flex flex-col py-6 space-y-4">
+								{castsData.map((castData: CastData) => (
+									<CastPreview castData={castData} key={castData.cast.hash} />
+								))}
+								{hasMore && (
+									<div
+										ref={ref}
+										className="flex justify-center items-center p-4"
+									>
+										<Spinner size="3" />
+									</div>
+								)}
+							</div>
+						) : (
+							<div className="w-full flex justify-center items-center pt-6 text-slate-400">
+								<span>There are no casts to display here yet.</span>
 							</div>
 						)}
-					</div>
+					</>
 				) : (
 					<div className="flex justify-center items-center pt-16">
 						<Spinner size="3" />

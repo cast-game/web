@@ -44,6 +44,14 @@ const Activity = () => {
 				}`);
 
 		const newTransactions = response.transactions.items;
+		if (newTransactions.length === 0) {
+			setHasNextPage(false);
+			setTransactions([]);
+			setUsers([]);
+			setCasts([]);
+			return;
+		}
+
 		setEndCursor(response.transactions.pageInfo.endCursor);
 		setHasNextPage(response.transactions.pageInfo.hasNextPage);
 
@@ -94,70 +102,76 @@ const Activity = () => {
 
 	return (
 		<div className="flex justify-center">
-			<div className="flex flex-col gap-4 w-full">
-				{transactions && casts && users ? (
-					<>
-						{transactions.map((tx: any, i: number) => {
-							const castData = casts.find(
-								(c: any) => c.cast.hash === tx.castHash
-							);
-							const sender = users.find(
-								(user: any) => user.fid === Number(tx.senderFid)
-							);
-							const timeSince = getTimeSince(tx.timestamp);
+			{transactions && casts && users ? (
+				<>
+					{transactions.length > 0 ? (
+						<div className="flex flex-col gap-4 w-full">
+							{transactions.map((tx: any, i: number) => {
+								const castData = casts.find(
+									(c: any) => c.cast.hash === tx.castHash
+								);
+								const sender = users.find(
+									(user: any) => user.fid === Number(tx.senderFid)
+								);
+								const timeSince = getTimeSince(tx.timestamp);
 
-							return (
-								<div className="p-3 bg-zinc-300 rounded" key={i}>
-									<div className="flex items-center font-medium text-black justify-between mb-3">
-										<div className="flex items-center">
-											<a
-												href={`https://warpcast.com/${sender?.username}`}
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												<div className="flex items-center cursor-pointer">
-													<Image
-														src={sender?.pfp_url!}
-														width={30}
-														height={30}
-														alt={sender?.username!}
-														className="rounded-full"
-													/>
-													<span className="font-bold mr-1 ml-2">
-														@{sender?.username}
-													</span>
-												</div>
-											</a>
-											<span>
-												{tx.type === "buy" ? "purchased" : "sold"} for{" "}
-												<b>
-													{Number(
-														Number(formatEther(BigInt(tx.price))).toFixed(5)
-													).toString()}{" "}
-													ETH
-												</b>
-											</span>
+								return (
+									<div className="p-3 bg-zinc-300 rounded" key={i}>
+										<div className="flex items-center font-medium text-black justify-between mb-3">
+											<div className="flex items-center">
+												<a
+													href={`https://warpcast.com/${sender?.username}`}
+													target="_blank"
+													rel="noopener noreferrer"
+												>
+													<div className="flex items-center cursor-pointer">
+														<Image
+															src={sender?.pfp_url!}
+															width={30}
+															height={30}
+															alt={sender?.username!}
+															className="rounded-full"
+														/>
+														<span className="font-bold mr-1 ml-2">
+															@{sender?.username}
+														</span>
+													</div>
+												</a>
+												<span>
+													{tx.type === "buy" ? "purchased" : "sold"} for{" "}
+													<b>
+														{Number(
+															Number(formatEther(BigInt(tx.price))).toFixed(5)
+														).toString()}{" "}
+														ETH
+													</b>
+												</span>
+											</div>
+											<span className="text-sm">{`${timeSince} ${
+												timeSince === "just now" ? "" : "ago"
+											}`}</span>
 										</div>
-										<span className="text-sm">{`${timeSince} ${
-											timeSince === "just now" ? "" : "ago"
-										}`}</span>
+										<CastPreview castData={castData!} showPrice={false} />
 									</div>
-									<CastPreview castData={castData!} showPrice={false} />
+								);
+							})}
+							{hasNextPage && (
+								<div ref={ref} className="flex justify-center items-center p-4">
+									<Spinner size="3" />
 								</div>
-							);
-						})}
-						{hasNextPage && (
-							<div ref={ref} className="flex justify-center items-center p-4">
-								<Spinner size="3" />
-							</div>
-						)}
-					</>
-				) : (
-					<div className="flex justify-center items-center pt-16">
-						<Spinner size="3" />
-					</div>
-				)}
-			</div>
+							)}
+						</div>
+					) : (
+						<div className="w-full flex justify-center items-center pt-6 text-slate-400">
+							<span>There is nothing to show here yet.</span>
+						</div>
+					)}
+				</>
+			) : (
+				<div className="flex justify-center items-center pt-16">
+					<Spinner size="3" />
+				</div>
+			)}
 		</div>
 	);
 };
