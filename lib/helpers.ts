@@ -1,43 +1,34 @@
 export function formatTimeRemaining(unixTimestamp: number): string {
-  const now = Math.floor(Date.now() / 1000); // Current Unix timestamp
-  const difference = unixTimestamp - now;
+	const now = Math.floor(Date.now() / 1000); // Current Unix timestamp
+	const difference = unixTimestamp - now;
 
-  if (difference <= 0) {
-    return "-";
-  }
+	if (difference <= 0) {
+		return "-";
+	}
 
-  const hours = Math.floor(difference / 3600);
-  const minutes = Math.floor((difference % 3600) / 60);
-  const seconds = difference % 60;
+	const hours = Math.floor(difference / 3600);
+	const minutes = Math.floor((difference % 3600) / 60);
+	const seconds = difference % 60;
 
-  return `${hours}:${String(minutes).padStart(2, "0")}:${String(
-    seconds
-  ).padStart(2, "0")}`;
+	return `${hours}:${String(minutes).padStart(2, "0")}:${String(
+		seconds
+	).padStart(2, "0")}`;
 }
 
-export function getTimeSince(date: string) {
-  const _date = new Date(date);
-  var seconds = Math.floor((Number(new Date()) - Number(_date)) / 1000);
-  var interval = Math.floor(seconds / 31536000);
+export const getTimeSince = (unix: string): string => {
+	const seconds = Math.floor((Date.now() - Number(unix)) / 1000);
+	const intervals = [
+		{ seconds: 31536000, label: "y" },
+		{ seconds: 2592000, label: "mo" },
+		{ seconds: 86400, label: "d" },
+		{ seconds: 3600, label: "h" },
+		{ seconds: 60, label: "m" },
+	];
 
-  if (interval > 1) {
-    return interval + "y";
-  }
-  interval = Math.floor(seconds / 2592000);
-  if (interval > 1) {
-    return interval + "mo";
-  }
-  interval = Math.floor(seconds / 86400);
-  if (interval > 1) {
-    return interval + "d";
-  }
-  interval = Math.floor(seconds / 3600);
-  if (interval > 1) {
-    return interval + "h";
-  }
-  interval = Math.floor(seconds / 60);
-  if (interval > 1) {
-    return interval + "m";
-  }
-  return Math.floor(seconds) + "s";
-}
+	for (let { seconds: intervalSeconds, label } of intervals) {
+		const interval = Math.floor(seconds / intervalSeconds);
+		if (interval >= 1) return `${interval}${label}`;
+	}
+
+	return "just now";
+};
