@@ -118,26 +118,22 @@ const Activity = () => {
 								return (
 									<div className="p-3 bg-zinc-300 rounded" key={i}>
 										<div className="flex items-center font-medium text-black justify-between mb-3">
-											<div className="flex items-center">
+											<div className="flex items-center gap-2">
 												<a
 													href={`https://warpcast.com/${sender?.username}`}
 													target="_blank"
 													rel="noopener noreferrer"
 												>
-													<div className="flex items-center cursor-pointer">
-														<Image
-															src={sender?.pfp_url!}
-															width={30}
-															height={30}
-															alt={sender?.username!}
-															className="rounded-full"
-														/>
-														<span className="font-bold mr-1 ml-2">
-															@{sender?.username}
-														</span>
-													</div>
+													<Image
+														src={sender?.pfp_url!}
+														width={30}
+														height={30}
+														alt={sender?.username!}
+														className="rounded-full cursor-pointer"
+													/>
 												</a>
-												<span>
+												<span className="text-sm sm:text-base text-clip">
+													<b>@{sender?.username}{" "}</b>
 													{tx.type === "buy" ? "purchased" : "sold"} for{" "}
 													<b>
 														{Number(
@@ -147,7 +143,7 @@ const Activity = () => {
 													</b>
 												</span>
 											</div>
-											<span className="text-sm">{`${timeSince} ${
+											<span className="sm:text-sm text-xs text-right">{`${timeSince} ${
 												timeSince === "just now" ? "" : "ago"
 											}`}</span>
 										</div>

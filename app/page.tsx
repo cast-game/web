@@ -209,8 +209,8 @@ const Home = () => {
 
 	return (
 		<div className="flex flex-col w-full">
-			<div className="flex justify-between items-center mb-6 ">
-				<div className="flex items-center gap-3">
+			<div className="sm:flex sm:flex-row flex-col justify-between items-center mb-6">
+				<div className="flex items-center gap-3 sm:mb-0 mb-2">
 					<div className="relative">
 						{label === "trading ends" && (
 							<div className="absolute -inset-0.5 bg-green-500 rounded-full animate-ping opacity-75"></div>
@@ -219,7 +219,7 @@ const Home = () => {
 							className={`relative rounded-full h-2 w-2 ${indicatorColor}`}
 						></div>
 					</div>
-					<span className="text-2xl font-medium text-slate-300">
+					<span className="sm:text-2xl text-xl font-medium text-slate-300">
 						{round?.title}
 					</span>
 				</div>
@@ -227,7 +227,7 @@ const Home = () => {
 					href={`https://warpcast.com/~/channel/${channel?.id}`}
 					target="_blank"
 					rel="noopener noreferrer"
-					className="flex items-center ml-4 gap-2"
+					className="flex items-center sm:ml-4 gap-2"
 				>
 					{channel ? (
 						<Image
@@ -240,7 +240,7 @@ const Home = () => {
 					) : (
 						<div className="h-7 w-7 rounded-full bg-slate-500/50 animate-pulse"></div>
 					)}
-					<span className="text-lg font-bold">/{round?.channelId}</span>
+					<span className="sm:text-lg text-md font-bold">/{round?.channelId}</span>
 				</a>
 			</div>
 
