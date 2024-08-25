@@ -4,6 +4,7 @@ import { formatEther } from "viem";
 const apiEndpoint = "https://api-production-c6c20.up.railway.app/";
 
 export const getCasts = async (castsHashes: string[]) => {
+	if (castsHashes.length === 0) return [];
 	const res = await fetch("/api/getCasts", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },

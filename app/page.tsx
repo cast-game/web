@@ -148,10 +148,10 @@ const Home = () => {
 		(newSortBy: "score" | "price" | "latest") => {
 			if (ticketsData && sortBy !== newSortBy) {
 				setSortBy(newSortBy);
-				setCastsData([]);
+				setCastsData(null);
 				setPage(1);
 				setHasMore(true);
-				fetchCasts(ticketsData, newSortBy, page);
+				fetchCasts(ticketsData, newSortBy, 1);
 			}
 		},
 		[sortBy, ticketsData, fetchCasts, page]
