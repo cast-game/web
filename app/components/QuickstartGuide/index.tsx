@@ -7,7 +7,7 @@ import {
 	DialogTrigger,
 	DialogFooter,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -110,11 +110,18 @@ const pages = [
 ];
 const QuickstartGuide: React.FC<QuickstartGuideProps> = ({ children }) => {
 	const [page, setPage] = useState(0);
+	const [open, setOpen] = useState(false);
+
+	useEffect(() => {
+		if (open) {
+			setPage(0);
+		}
+	}, [open]);
 
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>{children}</DialogTrigger>
-			<DialogContent className="bg-slate-100 text-black h-[500px] overflow-y-auto flex flex-col">
+			<DialogContent className="bg-slate-100 text-black min-h-[500px] overflow-y-auto flex flex-col">
 				<DialogHeader>
 					<DialogTitle className="text-2xl">{pages[page].title}</DialogTitle>
 				</DialogHeader>
