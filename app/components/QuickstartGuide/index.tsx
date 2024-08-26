@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Image from "next/image";
 import {
 	Dialog,
@@ -18,7 +18,7 @@ interface QuickstartGuideProps {
 	children: React.ReactNode;
 }
 
-const QuickstartGuide: React.FC<QuickstartGuideProps> = ({ children }) => {
+const QuickstartGuideContent: React.FC<QuickstartGuideProps> = ({ children }) => {
 	const [page, setPage] = useState(0);
 	const searchParams = useSearchParams();
 	const router = useRouter();
@@ -208,6 +208,14 @@ const QuickstartGuide: React.FC<QuickstartGuideProps> = ({ children }) => {
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
+	);
+};
+
+const QuickstartGuide: React.FC<QuickstartGuideProps> = ({ children }) => {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<QuickstartGuideContent>{children}</QuickstartGuideContent>
+		</Suspense>
 	);
 };
 

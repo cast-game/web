@@ -156,7 +156,7 @@ const Tickets = () => {
 				setHasNextPage(newHasNextPage);
 			}
 		},
-		[addresses, fetchUserAddresses]
+		[addresses, fetchUserAddresses, data]
 	);
 
 	useEffect(() => {

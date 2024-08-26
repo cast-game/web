@@ -154,7 +154,7 @@ const Home = () => {
 				fetchCasts(ticketsData, newSortBy, 1);
 			}
 		},
-		[sortBy, ticketsData, fetchCasts, page]
+		[sortBy, ticketsData, fetchCasts]
 	);
 
 	const getEndTimeAndLabel = useCallback(() => {
