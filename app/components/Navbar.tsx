@@ -2,11 +2,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/public/logo.png";
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { RoundContext } from "../context/provider";
 import { usePrivy } from "@privy-io/react-auth";
 import QuickstartGuide from "./QuickstartGuide";
 
@@ -16,7 +15,6 @@ const links = [
 ];
 
 const Navbar = () => {
-	const round = useContext(RoundContext);
 	const { login, logout, user } = usePrivy();
 
 	const pathname = usePathname();
@@ -35,7 +33,9 @@ const Navbar = () => {
 						<Image src={Logo} alt="cast.game" width={30} height={30} />
 					</a>
 					<QuickstartGuide>
-						<button className="bg-gradient-to-r from-teal-600 to-green-600 rounded px-4 py-1.5 cursor-pointer font-medium hover:opacity-90 text-white">
+						<button
+							className={`bg-gradient-to-r from-teal-600 to-green-600 rounded px-4 py-1.5 cursor-pointer font-medium hover:opacity-90 text-white `}
+						>
 							Quickstart guide
 						</button>
 					</QuickstartGuide>

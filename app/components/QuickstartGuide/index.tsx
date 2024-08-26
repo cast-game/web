@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GuideImage from "@/public/cast-action-guide.png";
+import { useSearchParams, useRouter } from "next/navigation";
 
 interface QuickstartGuideProps {
 	children: React.ReactNode;
@@ -19,7 +20,26 @@ interface QuickstartGuideProps {
 
 const QuickstartGuide: React.FC<QuickstartGuideProps> = ({ children }) => {
 	const [page, setPage] = useState(0);
+	const searchParams = useSearchParams();
+	const router = useRouter();
 	const [open, setOpen] = useState(false);
+
+	useEffect(() => {
+		const guideOpen = searchParams.get("guide") === "true";
+		setOpen(guideOpen);
+		if (guideOpen) {
+			setPage(0);
+		}
+	}, [searchParams]);
+
+	const handleOpenChange = (isOpen: boolean) => {
+		setOpen(isOpen);
+		if (isOpen) {
+			router.push("?guide=true", { scroll: false });
+		} else {
+			router.push("/", { scroll: false });
+		}
+	};
 
 	const pages = [
 		{
@@ -139,14 +159,8 @@ const QuickstartGuide: React.FC<QuickstartGuideProps> = ({ children }) => {
 		},
 	];
 
-	useEffect(() => {
-		if (open) {
-			setPage(0);
-		}
-	}, [open]);
-
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent className="bg-slate-100 text-black min-h-[500px] overflow-y-auto flex flex-col">
 				<DialogHeader>
